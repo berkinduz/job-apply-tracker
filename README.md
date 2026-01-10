@@ -2,6 +2,8 @@
 
 A modern, full-stack job application tracking system built with Next.js 16 and Supabase. Keep track of your job search journey with an intuitive interface, real-time updates, and powerful filtering capabilities.
 
+**🌐 Live Demo: [jobapplytracker.com](https://jobapplytracker.com)**
+
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?style=for-the-badge&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
@@ -44,6 +46,7 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
 - **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
 - **Modern UI Components** - Built with shadcn/ui and Radix primitives
 - **Toast Notifications** - Real-time feedback for user actions
+- **Glassmorphism Login** - Beautiful mobile login with background blur effect
 
 ## 🛠️ Tech Stack
 
@@ -210,6 +213,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Berkin Duz**
 
+- Website: [berkinduz.com](https://berkinduz.com)
 - GitHub: [@berkinduz](https://github.com/berkinduz)
 
 ---

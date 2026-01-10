@@ -171,7 +171,10 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem
+                      asChild
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Link href={`/applications/${application.id}/edit`}>
                         <Pencil className="mr-2 h-4 w-4" />
                         {t("common.edit")}
