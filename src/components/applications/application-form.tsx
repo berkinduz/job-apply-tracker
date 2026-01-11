@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApplicationStore, useSettingsStore } from "@/store";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ApplicationFormData,
   WorkType,
@@ -45,6 +45,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { fetchSkillSuggestions } from "@/lib/supabase/skills";
 
 interface ApplicationFormProps {
   application?: JobApplication;
@@ -141,6 +142,7 @@ export function ApplicationForm({
   const { addApplication, updateApplication } = useApplicationStore();
   const { getAllSources, getAllIndustries } = useSettingsStore();
   const t = useTranslations();
+  const locale = useLocale();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     application?.applicationDate
@@ -222,6 +224,9 @@ export function ApplicationForm({
   const watchIndustry = watch("companyIndustry");
   const watchSkills = watch("skills") || [];
   const [skillInput, setSkillInput] = useState("");
+  const [skillSuggestions, setSkillSuggestions] = useState<string[]>([]);
+  const [isSkillLoading, setIsSkillLoading] = useState(false);
+  const [showSkillSuggestions, setShowSkillSuggestions] = useState(false);
   const formattedCompanySalaryRange = formatSalaryRange(
     companySalaryCurrency,
     companySalaryMin,
@@ -239,6 +244,33 @@ export function ApplicationForm({
   useEffect(() => {
     setValue("salaryExpectation", formattedSalaryExpectation);
   }, [formattedSalaryExpectation, setValue]);
+
+  const addSkill = (skill: string) => {
+    const normalized = skill.trim();
+    if (!normalized) return;
+    if (!watchSkills.includes(normalized)) {
+      setValue("skills", [...watchSkills, normalized]);
+    }
+    setSkillInput("");
+    setShowSkillSuggestions(false);
+  };
+
+  useEffect(() => {
+    const query = skillInput.trim();
+    if (!query) {
+      setSkillSuggestions([]);
+      setIsSkillLoading(false);
+      return;
+    }
+    setIsSkillLoading(true);
+    const handler = setTimeout(async () => {
+      const results = await fetchSkillSuggestions(query, locale === "tr" ? "tr" : "en");
+      const labels = results.map((item) => item.label);
+      setSkillSuggestions(labels.filter((item) => !watchSkills.includes(item)));
+      setIsSkillLoading(false);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [skillInput, locale, watchSkills]);
 
   const onSubmit = async (data: ApplicationFormData) => {
     setIsSubmitting(true);
@@ -478,19 +510,53 @@ export function ApplicationForm({
               <Input
                 id="skills"
                 value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
+                onChange={(e) => {
+                  setSkillInput(e.target.value);
+                  setShowSkillSuggestions(true);
+                }}
+                onFocus={() => setShowSkillSuggestions(true)}
+                onBlur={() => {
+                  setTimeout(() => setShowSkillSuggestions(false), 100);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    const skill = skillInput.trim();
-                    if (skill && !watchSkills.includes(skill)) {
-                      setValue("skills", [...watchSkills, skill]);
-                    }
-                    setSkillInput("");
+                    addSkill(skillInput);
                   }
                 }}
                 placeholder={t("application.skillsHint")}
               />
+              {showSkillSuggestions && skillInput.trim().length > 0 && (
+                <div className="relative">
+                  <div className="absolute z-10 mt-2 w-full rounded-lg border bg-background shadow-md">
+                    {isSkillLoading ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("common.loading")}
+                      </div>
+                    ) : skillSuggestions.length > 0 ? (
+                      <div className="max-h-48 overflow-auto py-1">
+                        {skillSuggestions.map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              addSkill(suggestion);
+                            }}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("application.skillNoMatch")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               {watchSkills.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {watchSkills.map((skill, index) => (

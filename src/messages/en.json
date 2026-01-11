@@ -82,7 +82,8 @@
     "jobPosting": "View Job Posting",
     "addNoteTitle": "Add a note",
     "addNoteDescription": "Quickly jot down context without opening the edit form.",
-    "addNotePlaceholder": "Add a note about this application..."
+    "addNotePlaceholder": "Add a note about this application...",
+    "skillNoMatch": "No match found. Press Enter to add."
   },
   "status": {
     "applied": "Applied",

@@ -82,7 +82,8 @@
     "jobPosting": "İlanı Görüntüle",
     "addNoteTitle": "Not ekle",
     "addNoteDescription": "Düzenleme sayfasına gitmeden hızlıca not düş.",
-    "addNotePlaceholder": "Bu başvuru için not ekle..."
+    "addNotePlaceholder": "Bu başvuru için not ekle...",
+    "skillNoMatch": "Eşleşme yok. Eklemek için Enter."
   },
   "status": {
     "applied": "Başvuruldu",
