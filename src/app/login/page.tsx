@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
 import { Briefcase, Github, Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
-import ProductShowcase from "@/components/layout/product-showcase";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -27,28 +26,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPreviewButton, setShowPreviewButton] = useState(true);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      // Sayfa başında mıyız kontrol et (100px threshold)
-      if (window.scrollY > 100) {
-        setShowPreviewButton(false);
-      } else {
-        setShowPreviewButton(true);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToShowcase = () => {
-    const showcaseElement = document.getElementById("product-showcase");
-    if (showcaseElement) {
-      showcaseElement.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -97,7 +75,7 @@ export default function LoginPage() {
       toast.error(error.message);
       setIsLoading(false);
     } else {
-      router.push("/");
+      router.push("/applications");
       router.refresh();
     }
   };
@@ -220,11 +198,18 @@ export default function LoginPage() {
                       className="w-full"
                       disabled={isLoading}
                     >
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Mail className="mr-2 h-4 w-4" />
-                      )}
+                      <span className="relative mr-2 h-4 w-4">
+                        <Loader2
+                          className={`absolute left-0 top-0 h-4 w-4 animate-spin transition-opacity ${
+                            isLoading ? "opacity-100" : "opacity-0"
+                          }`}
+                        />
+                        <Mail
+                          className={`absolute left-0 top-0 h-4 w-4 transition-opacity ${
+                            isLoading ? "opacity-0" : "opacity-100"
+                          }`}
+                        />
+                      </span>
                       {t("loginWithEmail")}
                     </Button>
                   </form>
@@ -261,11 +246,18 @@ export default function LoginPage() {
                       className="w-full"
                       disabled={isLoading}
                     >
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Mail className="mr-2 h-4 w-4" />
-                      )}
+                      <span className="relative mr-2 h-4 w-4">
+                        <Loader2
+                          className={`absolute left-0 top-0 h-4 w-4 animate-spin transition-opacity ${
+                            isLoading ? "opacity-100" : "opacity-0"
+                          }`}
+                        />
+                        <Mail
+                          className={`absolute left-0 top-0 h-4 w-4 transition-opacity ${
+                            isLoading ? "opacity-0" : "opacity-100"
+                          }`}
+                        />
+                      </span>
                       {t("createAccount")}
                     </Button>
                   </form>
@@ -322,21 +314,6 @@ export default function LoginPage() {
           </Card>
         </div>
 
-        {/* Scroll to Features Button */}
-        {showPreviewButton && (
-          <button
-            onClick={scrollToShowcase}
-            className="hidden lg:block fixed bottom-8 right-8 px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 group bg-black/70 dark:bg-white/70 text-white dark:text-black hover:scale-105 font-medium backdrop-blur-sm"
-            aria-label="View features"
-          >
-            {t("preview")}
-          </button>
-        )}
-      </div>
-
-      {/* Product Showcase Section */}
-      <div id="product-showcase">
-        <ProductShowcase />
       </div>
     </>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +18,13 @@ const languages = [
 
 export function LanguageSwitcher() {
   const router = useRouter();
+  const [pendingLocale, setPendingLocale] = useState<string | null>(null);
 
-  const handleLanguageChange = (locale: string) => {
-    document.cookie = `locale=${locale};path=/;max-age=31536000`;
+  useEffect(() => {
+    if (!pendingLocale) return;
+    document.cookie = `locale=${pendingLocale};path=/;max-age=31536000`;
     router.refresh();
-  };
+  }, [pendingLocale, router]);
 
   return (
     <DropdownMenu>
@@ -35,7 +38,7 @@ export function LanguageSwitcher() {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => handleLanguageChange(lang.code)}
+            onClick={() => setPendingLocale(lang.code)}
           >
             <span className="mr-2">{lang.flag}</span>
             {lang.label}

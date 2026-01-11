@@ -32,14 +32,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useApplicationStore, useSettingsStore } from "@/store";
 import { useTranslations } from "next-intl";
 import {
   ApplicationFormData,
   WorkType,
   ApplicationStatus,
-  ContactPerson,
   JobApplication,
 } from "@/types";
 import { STATUS_ORDER, WORK_TYPE_CONFIG } from "@/config/constants";
@@ -137,7 +135,7 @@ export function ApplicationForm({
         toast.success(t("application.saveSuccess"));
         router.push(`/applications/${id}`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setIsSubmitting(false);
@@ -162,7 +160,7 @@ export function ApplicationForm({
       <div className="flex items-center gap-4">
         <Link
           href={
-            isEditing && application ? `/applications/${application.id}` : "/"
+            isEditing && application ? `/applications/${application.id}` : "/applications"
           }
         >
           <Button type="button" variant="ghost" size="icon">
@@ -598,7 +596,7 @@ export function ApplicationForm({
       <div className="flex justify-end gap-4 max-w-3xl">
         <Link
           href={
-            isEditing && application ? `/applications/${application.id}` : "/"
+            isEditing && application ? `/applications/${application.id}` : "/applications"
           }
         >
           <Button type="button" variant="outline">

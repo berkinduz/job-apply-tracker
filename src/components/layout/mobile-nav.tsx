@@ -2,22 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, Settings, Menu } from "lucide-react";
+import { LayoutDashboard, Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 export function MobileNav() {
   const pathname = usePathname();
   const t = useTranslations("nav");
-  const [open, setOpen] = useState(false);
 
   const navItems = [
     { href: "/", label: t("dashboard"), icon: LayoutDashboard },

@@ -179,5 +179,63 @@
     "preview": "Preview",
     "previewTitle": "Tame the chaos of your job search",
     "previewDesc": "Stop drowning in spreadsheets and scattered notes. Organize, track,and manage all your job applications in one professional dashboard."
+  },
+  "landing": {
+    "badge": "Built for every job seeker",
+    "title": "Track every application with total clarity.",
+    "subtitle": "JobTrack replaces messy spreadsheets with a clean dashboard, a drag-and-drop kanban, and quick notes so you always know what is next.",
+    "ctaPrimary": "Start Now",
+    "ctaSecondary": "See how it works",
+    "highlights": {
+      "pipeline": "8-stage hiring pipeline",
+      "filters": "Realtime filters",
+      "theme": "Dark + light mode"
+    },
+    "heroAlt": "JobTrack dashboard preview",
+    "preview": {
+      "tabs": {
+        "kanban": "Kanban",
+        "detail": "Detail"
+      },
+      "alts": {
+        "kanban": "Kanban view with draggable application cards",
+        "detail": "Application detail view with notes and timelines"
+      }
+    },
+    "features": {
+      "kanban": {
+        "title": "Kanban clarity",
+        "description": "Drag cards across stages and keep momentum visible."
+      },
+      "notes": {
+        "title": "Quick notes",
+        "description": "Add context instantly from the detail screen."
+      },
+      "insights": {
+        "title": "Smart insights",
+        "description": "Spot patterns with clean filters and sorting."
+      },
+      "timeline": {
+        "title": "Stay on time",
+        "description": "Never miss follow-ups or interview timelines."
+      }
+    },
+    "sections": {
+      "commandCenter": {
+        "title": "Everything in one command center",
+        "description": "Filter by status, source, or work type. Pin the applications that matter.",
+        "bullets": "Pinned focus|Multilingual|Responsive|Secure by design"
+      },
+      "dailyUse": {
+        "title": "Built for fast daily use",
+        "description": "Spend less time updating and more time interviewing.",
+        "badges": "Supabase Auth|Realtime filters|Kanban mode|Quick notes"
+      }
+    },
+    "ctaBottom": {
+      "title": "Ready to bring order to your job search?",
+      "description": "Create your dashboard and start tracking in minutes.",
+      "button": "Start tracking now"
+    }
   }
 }

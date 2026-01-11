@@ -1,12 +1,4 @@
 import Image from "next/image";
-import {
-  LayoutDashboard,
-  LineChart,
-  Bell,
-  ShieldCheck,
-  FileText,
-  Zap,
-} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function ProductShowcase() {
@@ -79,69 +71,7 @@ export default function ProductShowcase() {
           {/* Background Glow Effect */}
           <div className="absolute -inset-4 bg-primary/20 blur-2xl -z-10 rounded-[2rem] opacity-50 dark:opacity-30" />
         </div>
-
-        {/* 3. Features Grid **WILL BE ADDED LATER**
-        <div className="hidden md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <FeatureCard
-            icon={<LayoutDashboard className="w-6 h-6 text-primary" />}
-            title="Kanban Board"
-            description="Visualize your progress. Drag and drop applications across stages to see where you stand instantly."
-          />
-          <FeatureCard
-            icon={<Bell className="w-6 h-6 text-primary" />}
-            title="Smart Reminders"
-            description="Never miss an interview or a follow-up deadline. Set timely alerts for every step of the process."
-          />
-          <FeatureCard
-            icon={<LineChart className="w-6 h-6 text-primary" />}
-            title="Analytics & Insights"
-            description="Track your performance. See which platforms yield the best results and optimize your strategy."
-          />
-          <FeatureCard
-            icon={<FileText className="w-6 h-6 text-primary" />}
-            title="Resume Versioning"
-            description="Keep track of which resume version you sent to which company. Eliminate confusion forever."
-          />
-          <FeatureCard
-            icon={<ShieldCheck className="w-6 h-6 text-primary" />}
-            title="Privacy First"
-            description="Your data is encrypted and secure. We do not share your application history with third parties."
-          />
-          <FeatureCard
-            icon={<Zap className="w-6 h-6 text-primary" />}
-            title="Quick Setup"
-            description="No complex configurations. Sign up and start tracking your first application in less than 30 seconds."
-          />
-
-        </div>
-        */}
       </div>
     </section>
-  );
-}
-
-// Helper Card Component
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: any;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div
-      id="product-showcase"
-      className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
-    >
-      <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 text-primary">
-        {icon}
-      </div>
-      <h3 className="font-semibold text-xl mb-2 text-card-foreground">
-        {title}
-      </h3>
-      <p className="text-muted-foreground leading-relaxed">{description}</p>
-    </div>
   );
 }

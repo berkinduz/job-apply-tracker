@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useApplicationStore } from "@/store";
 import { useTranslations } from "next-intl";
-import { SortField, SortOrder } from "@/types";
+import { SortField } from "@/types";
 import { cn } from "@/lib/utils";
 
 const sortFields: SortField[] = [

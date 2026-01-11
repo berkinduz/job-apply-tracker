@@ -1,6 +1,6 @@
-# 🎯 Job Application Tracker
+# 🎯 JobTrack — Job Application Tracker
 
-A modern, full-stack job application tracking system built with Next.js 16 and Supabase. Keep track of your job search journey with an intuitive interface, real-time updates, and powerful filtering capabilities.
+A modern, full-stack job application tracking system built with Next.js 16 and Supabase. Track every application with a clean dashboard, a drag-and-drop kanban, and quick notes so you always know what’s next.
 
 **🌐 Live Demo: [jobapplytracker.com](https://jobapplytracker.com)**
 
@@ -9,6 +9,22 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss)
+
+## 👀 Product Preview
+
+<p align="center">
+  <img src="public/hero_preview_light.png" alt="JobTrack dashboard preview" width="960" />
+</p>
+
+<p align="center">
+  <video src="public/kanban_light.webm" controls muted loop playsinline width="960"></video>
+</p>
+
+<p align="center">
+  <video src="public/apply_detail_light.webm" controls muted loop playsinline width="960"></video>
+</p>
+
+> Dark mode assets are included (`public/hero_preview_dark.png`, `public/kanban_dark.webm`, `public/apply_detail_dark.webm`).
 
 ## ✨ Features
 
@@ -48,7 +64,7 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
 - **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
 - **Modern UI Components** - Built with shadcn/ui and Radix primitives
 - **Toast Notifications** - Real-time feedback for user actions
-- **Glassmorphism Login** - Beautiful mobile login with background blur effect
+- **SEO-first Landing** - Marketing homepage at `/`
 
 ## 🛠️ Tech Stack
 
@@ -135,7 +151,8 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
 
 6. **Open your browser**
 
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   - Landing: [http://localhost:3000](http://localhost:3000)
+   - App: [http://localhost:3000/applications](http://localhost:3000/applications)
 
 ## 📁 Project Structure
 

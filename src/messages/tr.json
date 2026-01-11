@@ -179,5 +179,63 @@
     "preview": "İncele",
     "previewTitle": "İş aramanızdaki karmaşayı önleyin",
     "previewDesc": "Tablolar ve dağınık notlar arasında boğulmayı bırakın. Tüm iş başvurularınızı profesyonel bir panoda düzenleyin, takip edin ve yönetin."
+  },
+  "landing": {
+    "badge": "Başvurular Arasında Kaybolanlar İçin",
+    "title": "Her başvuruyu tüm detaylarıyla takip edin.",
+    "subtitle": "JobTrack, dağınık tabloları temiz bir panel, sürükle-bırak kanban ve detaylı başvuru takibiyle değiştirir; bir sonraki adımı hep bilirsiniz.",
+    "ctaPrimary": "Hemen başla",
+    "ctaSecondary": "Nasıl çalışır",
+    "highlights": {
+      "pipeline": "8 aşamalı işe alım akışı",
+      "filters": "Gerçek zamanlı filtreler",
+      "theme": "Koyu + açık mod"
+    },
+    "heroAlt": "JobTrack panel ön izlemesi",
+    "preview": {
+      "tabs": {
+        "kanban": "Kanban",
+        "detail": "Detay"
+      },
+      "alts": {
+        "kanban": "Sürükle-bırak kartlarla kanban görünümü",
+        "detail": "Notlar ve zaman çizelgesi olan başvuru detay görünümü"
+      }
+    },
+    "features": {
+      "kanban": {
+        "title": "Kanban netliği",
+        "description": "Kartları aşamalar arasında sürükleyin, ilerlemeyi görünür tutun."
+      },
+      "notes": {
+        "title": "Hızlı notlar",
+        "description": "Detay ekranından anında bağlam ekleyin."
+      },
+      "insights": {
+        "title": "Akıllı içgörüler",
+        "description": "Temiz filtreleme ve sıralama ile süreci yakalayın."
+      },
+      "timeline": {
+        "title": "Zamanında kalın",
+        "description": "Süreci veya mülakat zaman çizelgelerini kaçırmayın."
+      }
+    },
+    "sections": {
+      "commandCenter": {
+        "title": "Tüm kontrol tek merkezde",
+        "description": "Durum, kaynak ya da çalışma tipine göre filtreleyin. Önemli başvuruları sabitleyin.",
+        "bullets": "Sabitlenmiş odak|Çok dilli|Responsive|Güvenli tasarım"
+      },
+      "dailyUse": {
+        "title": "Günlük kullanım için hızlı",
+        "description": "Güncellemeye daha az, mülakata daha çok zaman ayırın.",
+        "badges": "Supabase Auth|Gerçek zamanlı filtreler|Kanban modu|Hızlı notlar"
+      }
+    },
+    "ctaBottom": {
+      "title": "İş aramana düzen katmaya hazır mısın?",
+      "description": "Panelini oluştur ve dakikalar içinde takip etmeye başla.",
+      "button": "Hemen takip etmeye başla"
+    }
   }
 }

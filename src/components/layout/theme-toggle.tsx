@@ -12,7 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 
 export function ThemeToggle() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme } = useTheme();
   const t = useTranslations("settings");
 
   return (

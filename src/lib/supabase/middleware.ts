@@ -36,10 +36,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes - redirect to login if not authenticated
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/login");
+  const pathname = request.nextUrl.pathname;
+  const isAuthRoute = pathname.startsWith("/login");
   const isProtectedRoute =
-    !isAuthRoute && !request.nextUrl.pathname.startsWith("/auth");
+    pathname.startsWith("/applications") || pathname.startsWith("/settings");
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
@@ -47,10 +47,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect to home if already logged in and trying to access login
+  // Redirect to app if already logged in and trying to access login
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/applications";
     return NextResponse.redirect(url);
   }
 
