@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Briefcase, Settings } from "lucide-react";
+import { Briefcase, Settings, LayoutGrid } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 import { LogoutButton } from "./logout-button";
@@ -52,8 +52,20 @@ export function Header() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <>
+              <Link href="/applications">
+                <Button
+                  variant={
+                    pathname.startsWith("/applications") ? "secondary" : "ghost"
+                  }
+                  size="icon"
+                  className="h-9 w-9"
+                  aria-label="Dashboard"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link href="/settings">
                 <Button
                   variant={pathname === "/settings" ? "secondary" : "ghost"}
@@ -65,6 +77,12 @@ export function Header() {
               </Link>
               <LogoutButton />
             </>
+          ) : (
+            <Link href="/login">
+              <Button variant="outline" size="sm">
+                Sign in
+              </Button>
+            </Link>
           )}
         </div>
       </div>

@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +39,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useApplicationStore } from "@/store";
@@ -138,7 +136,7 @@ export function ApplicationDetail() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <p className="text-muted-foreground">{t("application.notFound")}</p>
-        <Link href="/" className="mt-4">
+        <Link href="/applications" className="mt-4">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t("common.back")}
@@ -154,7 +152,7 @@ export function ApplicationDetail() {
   const handleDelete = async () => {
     await deleteApplication(application.id);
     toast.success(t("application.deleteSuccess"));
-    router.push("/");
+    router.push("/applications");
   };
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
@@ -182,7 +180,7 @@ export function ApplicationDetail() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <Link href="/">
+            <Link href="/applications">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>

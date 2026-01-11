@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
   Sun,
@@ -28,7 +28,6 @@ import { Badge } from "@/components/ui/badge";
 import { useSettingsStore, useApplicationStore } from "@/store";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -60,11 +59,17 @@ export default function SettingsPage() {
   const [newSource, setNewSource] = useState("");
   const [newIndustry, setNewIndustry] = useState("");
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [pendingLocale, setPendingLocale] = useState<"en" | "tr" | null>(null);
+
+  useEffect(() => {
+    if (!pendingLocale) return;
+    document.cookie = `locale=${pendingLocale};path=/;max-age=31536000`;
+    router.refresh();
+  }, [pendingLocale, router]);
 
   const handleLanguageChange = (locale: "en" | "tr") => {
     updateSettings({ language: locale });
-    document.cookie = `locale=${locale};path=/;max-age=31536000`;
-    router.refresh();
+    setPendingLocale(locale);
   };
 
   const handleAddSource = () => {
@@ -123,7 +128,7 @@ export default function SettingsPage() {
         } else {
           toast.error("Invalid backup file");
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to parse backup file");
       }
     };

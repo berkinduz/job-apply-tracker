@@ -123,3 +123,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes float-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-float-in {
+  animation: float-in 0.7s ease-out both;
+}
+
+.animate-float-in-delay {
+  animation: float-in 0.8s ease-out 0.12s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-in,
+  .animate-float-in-delay {
+    animation: none;
+  }
+}
+
+
