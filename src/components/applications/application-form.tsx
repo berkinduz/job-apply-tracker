@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { format } from "date-fns";
@@ -51,6 +51,88 @@ interface ApplicationFormProps {
   isEditing?: boolean;
 }
 
+const currencyOptions = [
+  "USD",
+  "EUR",
+  "GBP",
+  "TRY",
+  "CAD",
+  "AUD",
+  "CHF",
+  "JPY",
+  "CNY",
+  "INR",
+  "SEK",
+  "NOK",
+  "DKK",
+  "PLN",
+  "CZK",
+  "HUF",
+  "RON",
+  "BRL",
+  "MXN",
+  "SGD",
+  "HKD",
+  "NZD",
+  "ZAR",
+  "AED",
+  "SAR",
+];
+
+const defaultCurrency = "USD";
+
+const extractCurrency = (value?: string) => {
+  if (!value) return defaultCurrency;
+  const match = value.match(new RegExp(`\b(${currencyOptions.join("|")})\b`));
+  if (match?.[1]) return match[1];
+  if (value.includes("$")) return "USD";
+  if (value.toLowerCase().includes("tl") || value.toLowerCase().includes("try")) {
+    return "TRY";
+  }
+  return defaultCurrency;
+};
+
+const extractNumbers = (value?: string) => {
+  if (!value) return [];
+  const matches = value.match(/\d[\d,.]*/g) ?? [];
+  return matches.map((entry) => entry.replace(/,/g, ""));
+};
+
+const parseSalaryRange = (value?: string) => {
+  const currency = extractCurrency(value);
+  const numbers = extractNumbers(value);
+  return {
+    currency,
+    min: numbers[0] ?? "",
+    max: numbers[1] ?? "",
+  };
+};
+
+const parseSalaryExpectation = (value?: string) => {
+  const currency = extractCurrency(value);
+  const numbers = extractNumbers(value);
+  return {
+    currency,
+    amount: numbers[0] ?? "",
+  };
+};
+
+const formatSalaryRange = (
+  currency: string,
+  min: string,
+  max: string
+) => {
+  if (!min && !max) return "";
+  if (min && max) return `${currency} ${min}-${max}`;
+  if (min) return `${currency} ${min}`;
+  return `${currency} ${max}`;
+};
+
+const formatSalaryExpectation = (currency: string, amount: string) => {
+  if (!amount) return "";
+  return `${currency} ${amount}`;
+};
+
 export function ApplicationForm({
   application,
   isEditing = false,
@@ -64,6 +146,25 @@ export function ApplicationForm({
     application?.applicationDate
       ? new Date(application.applicationDate)
       : new Date()
+  );
+  const salaryRangeDefaults = parseSalaryRange(application?.companySalaryRange);
+  const salaryExpectationDefaults = parseSalaryExpectation(
+    application?.salaryExpectation
+  );
+  const [companySalaryCurrency, setCompanySalaryCurrency] = useState(
+    salaryRangeDefaults.currency
+  );
+  const [companySalaryMin, setCompanySalaryMin] = useState(
+    salaryRangeDefaults.min
+  );
+  const [companySalaryMax, setCompanySalaryMax] = useState(
+    salaryRangeDefaults.max
+  );
+  const [salaryExpectationCurrency, setSalaryExpectationCurrency] = useState(
+    salaryExpectationDefaults.currency
+  );
+  const [salaryExpectationAmount, setSalaryExpectationAmount] = useState(
+    salaryExpectationDefaults.amount
   );
 
   const sources = getAllSources();
@@ -121,6 +222,23 @@ export function ApplicationForm({
   const watchIndustry = watch("companyIndustry");
   const watchSkills = watch("skills") || [];
   const [skillInput, setSkillInput] = useState("");
+  const formattedCompanySalaryRange = formatSalaryRange(
+    companySalaryCurrency,
+    companySalaryMin,
+    companySalaryMax
+  );
+  const formattedSalaryExpectation = formatSalaryExpectation(
+    salaryExpectationCurrency,
+    salaryExpectationAmount
+  );
+
+  useEffect(() => {
+    setValue("companySalaryRange", formattedCompanySalaryRange);
+  }, [formattedCompanySalaryRange, setValue]);
+
+  useEffect(() => {
+    setValue("salaryExpectation", formattedSalaryExpectation);
+  }, [formattedSalaryExpectation, setValue]);
 
   const onSubmit = async (data: ApplicationFormData) => {
     setIsSubmitting(true);
@@ -249,11 +367,45 @@ export function ApplicationForm({
               <Label htmlFor="companySalaryRange">
                 {t("application.companySalaryRange")} ({t("common.optional")})
               </Label>
-              <Input
-                id="companySalaryRange"
-                {...register("companySalaryRange")}
-                placeholder="e.g., $150,000 - $200,000"
-              />
+              <div className="grid grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] gap-2">
+                <Select
+                  value={companySalaryCurrency}
+                  onValueChange={setCompanySalaryCurrency}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencyOptions.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  id="companySalaryRange"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputMode="numeric"
+                  placeholder="Min"
+                  className="min-w-0"
+                  value={companySalaryMin}
+                  onChange={(event) => setCompanySalaryMin(event.target.value)}
+                />
+                <Input
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputMode="numeric"
+                  placeholder="Max"
+                  className="min-w-0"
+                  value={companySalaryMax}
+                  onChange={(event) => setCompanySalaryMax(event.target.value)}
+                />
+              </div>
+              <input type="hidden" {...register("companySalaryRange")} />
             </div>
           </CardContent>
         </Card>
@@ -285,11 +437,37 @@ export function ApplicationForm({
                 <Label htmlFor="salaryExpectation">
                   {t("application.salaryExpectation")} ({t("common.optional")})
                 </Label>
-                <Input
-                  id="salaryExpectation"
-                  {...register("salaryExpectation")}
-                  placeholder="e.g., $180,000"
-                />
+                <div className="grid grid-cols-[96px_minmax(0,1fr)_minmax(0,1fr)] gap-2">
+                  <Select
+                    value={salaryExpectationCurrency}
+                    onValueChange={setSalaryExpectationCurrency}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencyOptions.map((currency) => (
+                        <SelectItem key={currency} value={currency}>
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="salaryExpectation"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    placeholder="Amount"
+                    className="min-w-0"
+                    value={salaryExpectationAmount}
+                    onChange={(event) =>
+                      setSalaryExpectationAmount(event.target.value)
+                    }
+                  />
+                </div>
+                <input type="hidden" {...register("salaryExpectation")} />
               </div>
             </div>
 
