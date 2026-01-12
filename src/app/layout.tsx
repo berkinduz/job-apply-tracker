@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthToastListener } from "@/components/layout/auth-toast-listener";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -82,6 +83,7 @@ export default async function RootLayout({
               </main>
               <Footer />
             </div>
+            <AuthToastListener />
             <Toaster />
           </NextIntlClientProvider>
         </ThemeProvider>

@@ -4,6 +4,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -26,6 +34,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isResetOpen, setIsResetOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetSending, setIsResetSending] = useState(false);
 
 
   const handleGoogleLogin = async () => {
@@ -78,6 +89,28 @@ export default function LoginPage() {
       router.push("/applications");
       router.refresh();
     }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetEmail = resetEmail || email;
+    if (!targetEmail) {
+      toast.error(t("fillAllFields"));
+      return;
+    }
+
+    setIsResetSending(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t("resetEmailSent"));
+      setIsResetOpen(false);
+    }
+    setIsResetSending(false);
   };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
@@ -192,6 +225,18 @@ export default function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={isLoading}
                       />
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            setResetEmail(email);
+                            setIsResetOpen(true);
+                          }}
+                        >
+                          {t("forgotPassword")}
+                        </button>
+                      </div>
                     </div>
                     <Button
                       type="submit"
@@ -310,6 +355,32 @@ export default function LoginPage() {
                   GitHub
                 </Button>
               </div>
+              <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("resetPassword")}</DialogTitle>
+                    <DialogDescription>{t("resetPasswordDescription")}</DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handlePasswordReset} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">{t("email")}</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        disabled={isResetSending}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" className="w-full" disabled={isResetSending}>
+                        {t("resetPasswordSend")}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>

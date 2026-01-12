@@ -31,6 +31,7 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
 ### 🔐 Authentication
 
 - **Email/Password Authentication** - Secure sign up and sign in
+- **Password Reset** - Email-based recovery flow
 - **OAuth Integration** - Google and GitHub social login
 - **Protected Routes** - Middleware-based route protection
 - **Row Level Security** - Each user can only access their own data
