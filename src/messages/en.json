@@ -207,7 +207,7 @@
   "landing": {
     "badge": "Built for every job seeker",
     "title": "Track every application with total clarity.",
-    "subtitle": "JobTrack replaces messy spreadsheets with a clean dashboard, a drag-and-drop kanban, and quick notes so you always know what is next.",
+    "subtitle": "JobTrack replaces messy spreadsheets with a clean dashboard, a drag-and-drop kanban, and resume attachments so you always know what is next.",
     "ctaPrimary": "Start Now",
     "ctaSecondary": "See how it works",
     "highlights": {
@@ -223,7 +223,7 @@
       },
       "alts": {
         "kanban": "Kanban view with draggable application cards",
-        "detail": "Application detail view with notes and timelines"
+        "detail": "Application detail view with resume and timelines"
       }
     },
     "features": {
@@ -232,8 +232,8 @@
         "description": "Drag cards across stages and keep momentum visible."
       },
       "notes": {
-        "title": "Quick notes",
-        "description": "Add context instantly from the detail screen."
+        "title": "CV attachments",
+        "description": "Upload the exact CV you sent with each application."
       },
       "insights": {
         "title": "Smart insights",
@@ -253,7 +253,7 @@
       "dailyUse": {
         "title": "Built for fast daily use",
         "description": "Spend less time updating and more time interviewing.",
-        "badges": "Supabase Auth|Realtime filters|Kanban mode|Quick notes"
+        "badges": "Supabase Auth|Realtime filters|Kanban mode|Resume uploads"
       }
     },
     "ctaBottom": {

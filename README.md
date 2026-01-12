@@ -1,6 +1,6 @@
 # 🎯 JobTrack — Job Application Tracker
 
-A modern, full-stack job application tracking system built with Next.js 16 and Supabase. Track every application with a clean dashboard, a drag-and-drop kanban, and quick notes so you always know what’s next.
+A modern, full-stack job application tracking system built with Next.js 16 and Supabase. Track every application with a clean dashboard, a drag-and-drop kanban, and resume attachments so you always know what’s next.
 
 **🌐 Live Demo: [jobapplytracker.com](https://jobapplytracker.com)**
 
@@ -43,7 +43,7 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
   - Applied → Test Case → HR Interview → Technical Interview → Management Interview → Offer → Accepted/Rejected
 - **Kanban Board** - Drag and drop applications across stages
 - **Pin Important Applications** - Keep critical applications at the top
-- **Quick Notes** - Add notes directly from the detail view
+- **Resume Attachments (PDF)** - Upload the exact CV you sent for each application
 - **Contact Management** - Store recruiter and interviewer contact information
 - **Notes & Cover Letters** - Keep detailed notes for each application
 
@@ -144,13 +144,21 @@ A modern, full-stack job application tracking system built with Next.js 16 and S
    # The schema is available in supabase-schema.sql
    ```
 
-5. **Run the development server**
+5. **Enable resume uploads (optional)**
+
+   Run the resume storage script in Supabase SQL Editor:
+
+   ```bash
+   # The script is available in supabase-resume.sql
+   ```
+
+6. **Run the development server**
 
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
+7. **Open your browser**
 
    - Landing: [http://localhost:3000](http://localhost:3000)
    - App: [http://localhost:3000/applications](http://localhost:3000/applications)
@@ -220,7 +228,6 @@ This project solves a real problem I faced while also serving as a demonstration
 - [ ] Analytics dashboard with application statistics
 - [ ] Email reminders for follow-ups
 - [ ] Calendar integration for interview scheduling
-- [ ] Resume/CV attachment storage
 - [ ] AI-powered job matching suggestions
 - [ ] Export data to CSV/PDF
 - [ ] Browser extension for quick adding
