@@ -207,7 +207,7 @@
   "landing": {
     "badge": "Başvurular Arasında Kaybolanlar İçin",
     "title": "Her başvuruyu tüm detaylarıyla takip edin.",
-    "subtitle": "JobTrack, dağınık tabloları temiz bir panel, sürükle-bırak kanban ve detaylı başvuru takibiyle değiştirir; bir sonraki adımı hep bilirsiniz.",
+    "subtitle": "JobTrack, dağınık tabloları temiz bir panel, sürükle-bırak kanban ve CV ekleriyle değiştirir; bir sonraki adımı hep bilirsiniz.",
     "ctaPrimary": "Hemen başla",
     "ctaSecondary": "Nasıl çalışır",
     "highlights": {
@@ -223,7 +223,7 @@
       },
       "alts": {
         "kanban": "Sürükle-bırak kartlarla kanban görünümü",
-        "detail": "Notlar ve zaman çizelgesi olan başvuru detay görünümü"
+        "detail": "CV ve zaman çizelgesi olan başvuru detay görünümü"
       }
     },
     "features": {
@@ -232,8 +232,8 @@
         "description": "Kartları aşamalar arasında sürükleyin, ilerlemeyi görünür tutun."
       },
       "notes": {
-        "title": "Hızlı notlar",
-        "description": "Detay ekranından anında bağlam ekleyin."
+        "title": "CV ekleri",
+        "description": "Her başvuruya gönderdiğin CV'yi ekle."
       },
       "insights": {
         "title": "Akıllı içgörüler",
@@ -253,7 +253,7 @@
       "dailyUse": {
         "title": "Günlük kullanım için hızlı",
         "description": "Güncellemeye daha az, mülakata daha çok zaman ayırın.",
-        "badges": "Supabase Auth|Gerçek zamanlı filtreler|Kanban modu|Hızlı notlar"
+        "badges": "Supabase Auth|Gerçek zamanlı filtreler|Kanban modu|CV yükleme"
       }
     },
     "ctaBottom": {
