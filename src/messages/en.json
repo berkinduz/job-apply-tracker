@@ -207,44 +207,49 @@
   "landing": {
     "badge": "Built for every job seeker",
     "title": "Track every application with total clarity.",
-    "subtitle": "JobTrack replaces messy spreadsheets with a clean dashboard, a drag-and-drop kanban, and resume attachments so you always know what is next.",
+    "subtitle": "JobTrack replaces messy spreadsheets with a powerful dashboard. Track your interview funnel, manage resumes, and get real-time insights into your job search.",
     "ctaPrimary": "Start Now",
     "ctaSecondary": "See how it works",
     "highlights": {
-      "pipeline": "8-stage hiring pipeline",
-      "filters": "Realtime filters",
+      "pipeline": "Funnel Analytics",
+      "filters": "Resume Management",
       "theme": "Dark + light mode"
     },
     "heroAlt": "JobTrack dashboard preview",
     "preview": {
       "tabs": {
-        "kanban": "Kanban",
-        "detail": "Detail"
+        "kanban": "Kanban & Lists",
+        "detail": "Analytics"
       },
       "alts": {
-        "kanban": "Kanban view with draggable application cards",
-        "detail": "Application detail view with resume and timelines"
+        "kanban": "Kanban view for easy application tracking",
+        "detail": "Analytics dashboard showing response rates and charts"
       }
     },
     "features": {
       "kanban": {
-        "title": "Kanban clarity",
-        "description": "Drag cards across stages and keep momentum visible."
+        "title": "Drag-and-Drop Kanban",
+        "description": "Visualize your pipeline. Move applications from 'Applied' to 'Offer' with a simple drag."
       },
       "notes": {
-        "title": "CV attachments",
-        "description": "Upload the exact CV you sent with each application."
+        "title": "Resume Management",
+        "description": "Upload and pin the specific PDF resume you used for each application."
       },
       "insights": {
-        "title": "Smart insights",
-        "description": "Spot patterns with clean filters and sorting."
+        "title": "Analytics Dashboard",
+        "description": "Track your 'Response Rate' and see weekly activity trends to stay motivated."
       },
       "timeline": {
-        "title": "Stay on time",
-        "description": "Never miss follow-ups or interview timelines."
+        "title": "Timeline & Notes",
+        "description": "Log every interview contact, salary negotiation, and follow-up date."
       }
     },
     "sections": {
+      "analytics": {
+        "title": "Data-Driven Job Search",
+        "description": "Stop guessing. See exactly how your applications are performing.",
+        "bullets": "Real-time Response Rate|Weekly Activity Charts|Application Distribution|Work Type Analysis"
+      },
       "commandCenter": {
         "title": "Everything in one command center",
         "description": "Filter by status, source, or work type. Pin the applications that matter.",
@@ -257,8 +262,8 @@
       }
     },
     "ctaBottom": {
-      "title": "Ready to bring order to your job search?",
-      "description": "Create your dashboard and start tracking in minutes.",
+      "title": "Ready to land your next role?",
+      "description": "Join other developers who organize their job search with JobTrack.",
       "button": "Start tracking now"
     }
   }

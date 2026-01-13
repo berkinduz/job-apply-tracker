@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Briefcase, Settings, LayoutGrid } from "lucide-react";
+import { Briefcase, Settings, LayoutGrid, PieChart } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageSwitcher } from "./language-switcher";
 import { LogoutButton } from "./logout-button";
@@ -35,7 +35,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="w-full max-w-5xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href={isAuthenticated ? "/applications" : "/"} className="flex items-center gap-3 group">
+        <Link
+          href={isAuthenticated ? "/applications" : "/"}
+          className="flex items-center gap-3 group"
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/80 shadow-sm group-hover:shadow-md transition-shadow">
             <Briefcase className="h-5 w-5 text-primary-foreground" />
           </div>
@@ -64,6 +67,18 @@ export function Header() {
                   aria-label="Dashboard"
                 >
                   <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/analytics">
+                <Button
+                  variant={
+                    pathname.startsWith("/analytics") ? "secondary" : "ghost"
+                  }
+                  size="icon"
+                  className="h-9 w-9"
+                  aria-label="Analytics"
+                >
+                  <PieChart className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/settings">

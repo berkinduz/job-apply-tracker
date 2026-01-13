@@ -51,7 +51,9 @@ const jsonLd = {
 
 export default async function LandingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (user) {
     redirect("/applications");
   }
@@ -144,14 +146,14 @@ export default async function LandingPage() {
             description: t("features.kanban.description"),
           },
           {
-            icon: FileText,
-            title: t("features.notes.title"),
-            description: t("features.notes.description"),
-          },
-          {
             icon: LineChart,
             title: t("features.insights.title"),
             description: t("features.insights.description"),
+          },
+          {
+            icon: FileText,
+            title: t("features.notes.title"),
+            description: t("features.notes.description"),
           },
           {
             icon: Bell,
@@ -161,8 +163,8 @@ export default async function LandingPage() {
         ].map((feature) => (
           <Card key={feature.title} className="bg-background/80">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <feature.icon className="h-4 w-4 text-primary" />
+              <CardTitle className="flex items-start gap-2 text-base">
+                <feature.icon className="h-4 w-4 shrink-0 text-primary translate-y-1" />
                 {feature.title}
               </CardTitle>
             </CardHeader>
@@ -173,7 +175,44 @@ export default async function LandingPage() {
         ))}
       </section>
 
-      <section className="mt-16 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="mt-24 grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            {t("sections.analytics.title")}
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            {t("sections.analytics.description")}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {t("sections.analytics.bullets")
+              .split("|")
+              .map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <span className="text-sm font-medium">{item}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl border bg-background shadow-2xl">
+          <Image
+            src="/analytics_light.png"
+            alt="Analytics Dashboard Preview"
+            width={1600}
+            height={960}
+            className="w-full object-cover p-3 dark:hidden"
+          />
+          <Image
+            src="/analytics_dark.png"
+            alt="Analytics Dashboard Preview"
+            width={1600}
+            height={960}
+            className="hidden w-full object-cover p-3 dark:block"
+          />
+        </div>
+      </section>
+
+      <section className="mt-24 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="bg-muted/30">
           <CardHeader>
             <CardTitle>{t("sections.commandCenter.title")}</CardTitle>

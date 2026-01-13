@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, Settings } from "lucide-react";
+import { LayoutDashboard, Plus, Settings, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -13,6 +13,7 @@ export function MobileNav() {
 
   const navItems = [
     { href: "/", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/analytics", label: "Analytics", icon: PieChart },
     { href: "/applications/new", label: t("newApplication"), icon: Plus },
     { href: "/settings", label: t("settings"), icon: Settings },
   ];
