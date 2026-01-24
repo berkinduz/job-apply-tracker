@@ -69,6 +69,28 @@ export default async function LandingPage() {
         <div className="absolute -top-24 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-28 -left-16 h-52 w-52 rounded-full bg-emerald-500/10 blur-3xl" />
 
+        <a
+          href="https://www.producthunt.com/products/jobtrack-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-jobtrack-3"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10"
+        >
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1067576&theme=light&t=1769268469729"
+            alt="JobTrack - Track every application with total clarity. | Product Hunt"
+            width="250"
+            height="54"
+            className="dark:hidden"
+          />
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1067576&theme=dark&t=1769268434465"
+            alt="JobTrack - Track every application with total clarity. | Product Hunt"
+            width="250"
+            height="54"
+            className="hidden dark:block"
+          />
+        </a>
+
         <div className="space-y-10">
           <div className="space-y-6 max-w-2xl">
             <Badge className="w-fit" variant="secondary">
