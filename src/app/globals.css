@@ -296,6 +296,63 @@
   .jt-app-body  { padding-bottom: 0; }
 }
 
+/* ----- Login layout ----- */
+.jt-only-mobile { display: flex; }
+.jt-login-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+.jt-login-aside { display: none; }
+.jt-login-form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 32px;
+}
+.jt-login-quote {
+  position: relative;
+  z-index: 2;
+  padding: 0 40px 36px;
+  color: #fff;
+}
+.jt-login-quote-text {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 10px 0 0;
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.92);
+  max-width: 460px;
+}
+@media (min-width: 1024px) {
+  .jt-only-mobile { display: none; }
+  .jt-login-grid { grid-template-columns: 1.05fr 1fr; }
+  .jt-login-aside {
+    display: flex;
+    flex-direction: column;
+    background:
+      linear-gradient(135deg, rgba(58, 60, 184, 0.92), rgba(36, 38, 120, 0.95)),
+      radial-gradient(circle at 70% 20%, rgba(245, 184, 66, 0.35), transparent 50%);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+  .jt-login-form-wrap { padding: 32px; }
+}
+
+/* Two-col rows in application form on tablet+ */
+@media (min-width: 640px) {
+  .jt-form-row { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* Analytics responsive grids */
+@media (min-width: 768px) {
+  .jt-analytics-grid { grid-template-columns: 1fr 1fr !important; }
+  .jt-metric-strip   { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
 @keyframes float-in {
   0%   { opacity: 0; transform: translateY(16px) scale(0.98); }
   100% { opacity: 1; transform: translateY(0) scale(1); }

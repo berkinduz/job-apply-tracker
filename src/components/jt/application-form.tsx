@@ -1,0 +1,1081 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { format } from "date-fns";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Plus,
+  X,
+  Trash2,
+  Loader2,
+  CalendarIcon,
+  Upload,
+  FileText,
+} from "lucide-react";
+import { v4 as uuid } from "uuid";
+import { toast } from "sonner";
+
+import {
+  JtButton,
+  JtDot,
+  STATUS_TOKENS,
+  STATUS_ORDER,
+  type JtStatusKey,
+} from "@/components/jt/primitives";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
+import { useApplicationStore, useSettingsStore } from "@/store";
+import { createClient } from "@/lib/supabase/client";
+import type {
+  ApplicationFormData,
+  JobApplication,
+  WorkType,
+  ApplicationStatus,
+} from "@/types";
+import { fetchSkillSuggestions } from "@/lib/supabase/skills";
+
+const CURRENCIES = ["USD", "EUR", "GBP", "TRY", "CAD", "AUD", "CHF", "JPY", "INR"];
+const MAX_RESUME = 2 * 1024 * 1024;
+
+interface JtApplicationFormProps {
+  application?: JobApplication;
+  isEditing?: boolean;
+}
+
+export function JtApplicationForm({ application, isEditing }: JtApplicationFormProps) {
+  const router = useRouter();
+  const supabase = React.useMemo(() => createClient(), []);
+  const { addApplication, updateApplication } = useApplicationStore();
+  const { getAllSources, getAllIndustries } = useSettingsStore();
+
+  const today = format(new Date(), "yyyy-MM-dd");
+  const sources = getAllSources();
+  const industries = getAllIndustries();
+
+  // Parse existing salary into currency + amount
+  const initSalary = parseSalary(application?.salaryExpectation);
+  const [salaryCurrency, setSalaryCurrency] = React.useState(initSalary.currency);
+  const [salaryAmount, setSalaryAmount] = React.useState(initSalary.amount);
+
+  const [date, setDate] = React.useState<Date>(
+    application?.applicationDate ? new Date(application.applicationDate) : new Date(),
+  );
+  const [resumeFile, setResumeFile] = React.useState<File | null>(null);
+  const [resumePath, setResumePath] = React.useState(application?.resumePath || "");
+  const [resumeBusy, setResumeBusy] = React.useState(false);
+  const [skillInput, setSkillInput] = React.useState("");
+  const [skillSuggestions, setSkillSuggestions] = React.useState<string[]>([]);
+  const [showSkillSuggestions, setShowSkillSuggestions] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const { register, handleSubmit, control, setValue, watch } =
+    useForm<ApplicationFormData>({
+      defaultValues: application
+        ? {
+            companyName: application.companyName,
+            companyLocation: application.companyLocation || "",
+            companyIndustry: application.companyIndustry || "",
+            companySalaryRange: application.companySalaryRange,
+            position: application.position,
+            skills: application.skills || [],
+            applicationDate: application.applicationDate,
+            coverLetter: application.coverLetter,
+            salaryExpectation: application.salaryExpectation,
+            jobPostingUrl: application.jobPostingUrl,
+            jobPostingContent: application.jobPostingContent,
+            source: application.source || "LinkedIn",
+            workType: application.workType,
+            notes: application.notes,
+            contacts: application.contacts,
+            status: application.status,
+          }
+        : {
+            companyName: "",
+            companyLocation: "",
+            companyIndustry: "",
+            position: "",
+            skills: [],
+            applicationDate: today,
+            source: "LinkedIn",
+            workType: "remote",
+            status: "applied",
+            contacts: [],
+          },
+    });
+
+  const { fields, append, remove } = useFieldArray({ control, name: "contacts" });
+
+  const watchStatus = watch("status") || "applied";
+  const watchSource = watch("source");
+  const watchIndustry = watch("companyIndustry");
+  const watchWorkType = watch("workType");
+  const watchSkillsValue = useWatch({ control, name: "skills" });
+  const watchSkills = React.useMemo(() => watchSkillsValue ?? [], [watchSkillsValue]);
+
+  React.useEffect(() => {
+    const composed = salaryAmount ? `${salaryCurrency} ${salaryAmount}` : "";
+    setValue("salaryExpectation", composed);
+  }, [salaryCurrency, salaryAmount, setValue]);
+
+  React.useEffect(() => {
+    const q = skillInput.trim();
+    if (!q) {
+      setSkillSuggestions([]);
+      return;
+    }
+    const handler = setTimeout(async () => {
+      const results = await fetchSkillSuggestions(q, "en");
+      setSkillSuggestions(
+        results.map((r) => r.label).filter((s) => !watchSkills.includes(s)),
+      );
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [skillInput, watchSkills]);
+
+  const addSkill = (skill: string) => {
+    const normalized = skill.trim();
+    if (!normalized || watchSkills.includes(normalized)) {
+      setSkillInput("");
+      return;
+    }
+    setValue("skills", [...watchSkills, normalized]);
+    setSkillInput("");
+    setShowSkillSuggestions(false);
+  };
+
+  const handleResumePick = (file: File) => {
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file.");
+      return;
+    }
+    if (file.size > MAX_RESUME) {
+      toast.error("Resume must be 2 MB or smaller.");
+      return;
+    }
+    setResumeFile(file);
+  };
+
+  const uploadResume = async (applicationId: string): Promise<string | undefined> => {
+    if (!resumeFile) return resumePath || undefined;
+    setResumeBusy(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not authenticated");
+      const path = `${u.user.id}/${applicationId}/resume.pdf`;
+      const { error } = await supabase.storage
+        .from("resumes")
+        .upload(path, resumeFile, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+      if (error) throw error;
+      setResumePath(path);
+      setResumeFile(null);
+      return path;
+    } finally {
+      setResumeBusy(false);
+    }
+  };
+
+  const onSubmit = async (data: ApplicationFormData) => {
+    setSubmitting(true);
+    try {
+      if (isEditing && application) {
+        const path = await uploadResume(application.id);
+        await updateApplication(application.id, {
+          ...data,
+          resumePath: path || resumePath || undefined,
+        });
+        toast.success("Updated");
+        router.push(`/applications/${application.id}`);
+      } else {
+        const id = await addApplication(data);
+        const path = await uploadResume(id);
+        if (path) await updateApplication(id, { resumePath: path });
+        toast.success(`Added ${data.companyName} — ${data.position}`);
+        router.push(`/applications/${id}`);
+      }
+    } catch (err) {
+      toast.error((err as Error).message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const statusToken = STATUS_TOKENS[watchStatus as JtStatusKey];
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{
+        background: "var(--jt-bg)",
+        color: "var(--jt-text)",
+        minHeight: "100vh",
+        paddingBottom: 96,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          borderBottom: "1px solid var(--jt-border-2)",
+          background: "var(--jt-bg)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 880,
+            margin: "0 auto",
+            padding: "14px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            justifyContent: "space-between",
+          }}
+        >
+          <Link
+            href={
+              isEditing && application
+                ? `/applications/${application.id}`
+                : "/applications"
+            }
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13,
+              padding: "6px 10px 6px 8px",
+              border: "1px solid var(--jt-border)",
+              borderRadius: "var(--r-md)",
+              color: "var(--jt-text-2)",
+            }}
+          >
+            <ArrowLeft size={14} /> {isEditing ? "Back" : "Applications"}
+          </Link>
+          <h1
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              margin: 0,
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            {isEditing ? "Edit application" : "New application"}
+          </h1>
+          {/* Status pill (dropdown) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="focus-ring"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 12px",
+                  borderRadius: 999,
+                  background: statusToken.bg,
+                  color: statusToken.dot,
+                  border: "none",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
+              >
+                <JtDot color={statusToken.dot} size={7} />
+                {statusToken.label}
+                <ChevronDown size={13} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <div style={{ padding: 4, minWidth: 200 }}>
+                {STATUS_ORDER.map((st) => {
+                  const t = STATUS_TOKENS[st];
+                  return (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setValue("status", st as ApplicationStatus)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        width: "100%",
+                        padding: "8px 10px",
+                        background: "transparent",
+                        border: "none",
+                        borderRadius: "var(--r-sm)",
+                        fontSize: 13,
+                        color: "var(--jt-text)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.background = "var(--jt-bg-sunk)")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <JtDot color={t.dot} size={8} />
+                      <span style={{ flex: 1 }}>{t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div
+        style={{
+          maxWidth: 880,
+          margin: "0 auto",
+          padding: "32px 16px",
+        }}
+      >
+        {/* Essentials */}
+        <FormCard title="Essentials" description="Just enough to get started.">
+          <Row>
+            <Field label="Company name" required>
+              <input
+                {...register("companyName", { required: true })}
+                placeholder="e.g. Stripe"
+                style={inputStyle}
+                required
+              />
+            </Field>
+            <Field label="Role" required>
+              <input
+                {...register("position", { required: true })}
+                placeholder="e.g. Senior Frontend Engineer"
+                style={inputStyle}
+                required
+              />
+            </Field>
+          </Row>
+          <Row>
+            <Field label="Application date" optional>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    style={{
+                      ...inputStyle,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      textAlign: "left",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <CalendarIcon size={14} color="var(--jt-text-3)" />
+                    {format(date, "PP")}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(d) => {
+                      if (d) {
+                        setDate(d);
+                        setValue("applicationDate", format(d, "yyyy-MM-dd"));
+                      }
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </Field>
+            <Field label="Source" optional>
+              <select
+                {...register("source")}
+                style={selectStyle}
+                value={watchSource}
+                onChange={(e) => setValue("source", e.target.value)}
+              >
+                {sources.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+            </Field>
+          </Row>
+        </FormCard>
+
+        {/* Job details */}
+        <FormCard title="Job details" description="Helpful, not required.">
+          <Row>
+            <Field label="Location" optional>
+              <input
+                {...register("companyLocation")}
+                placeholder="e.g. Remote, San Francisco, Berlin"
+                style={inputStyle}
+              />
+            </Field>
+            <Field label="Work type" optional>
+              <PillToggle
+                options={[
+                  { value: "remote", label: "Remote" },
+                  { value: "hybrid", label: "Hybrid" },
+                  { value: "onsite", label: "On-site" },
+                ]}
+                value={watchWorkType}
+                onChange={(v) => setValue("workType", v as WorkType)}
+              />
+            </Field>
+          </Row>
+          <Row>
+            <Field label="Industry" optional>
+              <select
+                style={selectStyle}
+                value={watchIndustry || ""}
+                onChange={(e) => setValue("companyIndustry", e.target.value)}
+              >
+                <option value="">Pick one (optional)</option>
+                {industries.map((i) => (
+                  <option key={i}>{i}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Job posting URL" optional>
+              <input
+                {...register("jobPostingUrl")}
+                type="url"
+                placeholder="linkedin.com/jobs/..."
+                style={inputStyle}
+              />
+            </Field>
+          </Row>
+          <Field label="Salary expectation" optional>
+            <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 8 }}>
+              <select
+                style={selectStyle}
+                value={salaryCurrency}
+                onChange={(e) => setSalaryCurrency(e.target.value)}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Amount"
+                value={salaryAmount}
+                onChange={(e) => setSalaryAmount(e.target.value)}
+                style={inputStyle}
+              />
+              <input type="hidden" {...register("salaryExpectation")} />
+            </div>
+          </Field>
+        </FormCard>
+
+        {/* Your prep */}
+        <FormCard title="Your prep" description="Anything that helps you land the role.">
+          <Field label="Skills" optional>
+            <div style={{ position: "relative" }}>
+              <input
+                value={skillInput}
+                onChange={(e) => {
+                  setSkillInput(e.target.value);
+                  setShowSkillSuggestions(true);
+                }}
+                onFocus={() => setShowSkillSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSkillSuggestions(false), 120)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSkill(skillInput);
+                  }
+                  if (e.key === "Backspace" && !skillInput && watchSkills.length) {
+                    setValue("skills", watchSkills.slice(0, -1));
+                  }
+                }}
+                placeholder="Press Enter to add (e.g. React, TypeScript)"
+                style={inputStyle}
+              />
+              {showSkillSuggestions && skillInput && skillSuggestions.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    left: 0,
+                    right: 0,
+                    background: "var(--jt-bg-elev)",
+                    border: "1px solid var(--jt-border)",
+                    borderRadius: "var(--r-md)",
+                    boxShadow: "var(--sh-md)",
+                    overflow: "hidden",
+                    zIndex: 5,
+                    maxHeight: 200,
+                    overflowY: "auto",
+                  }}
+                >
+                  {skillSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        addSkill(s);
+                      }}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        background: "transparent",
+                        border: "none",
+                        fontSize: 13,
+                        color: "var(--jt-text)",
+                        cursor: "pointer",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.background = "var(--jt-bg-sunk)")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {watchSkills.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {watchSkills.map((s) => (
+                  <span
+                    key={s}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "4px 8px 4px 10px",
+                      background: "var(--jt-bg-sunk)",
+                      color: "var(--jt-text)",
+                      borderRadius: 99,
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {s}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setValue("skills", watchSkills.filter((x) => x !== s))
+                      }
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--jt-text-3)",
+                        padding: 0,
+                        display: "inline-flex",
+                      }}
+                      aria-label={`Remove ${s}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </Field>
+
+          <Field label="Resume (PDF)" optional>
+            <ResumeDrop
+              file={resumeFile}
+              path={resumePath}
+              busy={resumeBusy}
+              onPick={handleResumePick}
+              onClear={() => {
+                setResumeFile(null);
+                setResumePath("");
+              }}
+            />
+          </Field>
+
+          <Field label="Notes" optional>
+            <textarea
+              {...register("notes")}
+              rows={4}
+              placeholder="Anything worth remembering — referrals, prep ideas, recruiter signals…"
+              style={{ ...inputStyle, height: "auto", padding: 12, resize: "vertical", minHeight: 96 }}
+            />
+          </Field>
+
+          {/* Advanced — cover letter + contacts */}
+          <details
+            style={{
+              border: "1px solid var(--jt-border)",
+              borderRadius: "var(--r-md)",
+              marginTop: 6,
+            }}
+          >
+            <summary
+              style={{
+                padding: "12px 16px",
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: "pointer",
+                listStyle: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>Advanced — cover letter and contacts</span>
+              <span style={{ color: "var(--jt-text-3)", fontSize: 12 }}>Optional</span>
+            </summary>
+            <div style={{ padding: "0 16px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <Field label="Cover letter" optional>
+                <textarea
+                  {...register("coverLetter")}
+                  rows={6}
+                  placeholder="Paste your cover letter…"
+                  style={{ ...inputStyle, height: "auto", padding: 12, resize: "vertical", minHeight: 120 }}
+                />
+              </Field>
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>Contacts</span>
+                  <JtButton
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    icon={<Plus size={12} />}
+                    onClick={() =>
+                      append({
+                        id: uuid(),
+                        name: "",
+                        role: "",
+                        email: "",
+                        phone: "",
+                        linkedin: "",
+                        notes: "",
+                      })
+                    }
+                  >
+                    Add contact
+                  </JtButton>
+                </div>
+                {fields.length === 0 ? (
+                  <p style={{ fontSize: 13, color: "var(--jt-text-3)", margin: 0 }}>
+                    None yet — add recruiters or interviewers as they appear.
+                  </p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {fields.map((f, idx) => (
+                      <div
+                        key={f.id}
+                        style={{
+                          padding: 12,
+                          background: "var(--jt-bg-sunk)",
+                          borderRadius: "var(--r-md)",
+                          border: "1px solid var(--jt-border-2)",
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 8,
+                        }}
+                      >
+                        <input
+                          {...register(`contacts.${idx}.name`)}
+                          placeholder="Name"
+                          style={inputStyle}
+                        />
+                        <input
+                          {...register(`contacts.${idx}.role`)}
+                          placeholder="Role (recruiter, hiring manager…)"
+                          style={inputStyle}
+                        />
+                        <input
+                          {...register(`contacts.${idx}.email`)}
+                          type="email"
+                          placeholder="Email"
+                          style={inputStyle}
+                        />
+                        <input
+                          {...register(`contacts.${idx}.phone`)}
+                          placeholder="Phone"
+                          style={inputStyle}
+                        />
+                        <input
+                          {...register(`contacts.${idx}.linkedin`)}
+                          placeholder="LinkedIn URL"
+                          style={{ ...inputStyle, gridColumn: "span 2" }}
+                        />
+                        <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "flex-end" }}>
+                          <JtButton
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            icon={<Trash2 size={12} />}
+                            onClick={() => remove(idx)}
+                          >
+                            Remove
+                          </JtButton>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </details>
+        </FormCard>
+      </div>
+
+      {/* Sticky submit bar */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: "color-mix(in oklab, var(--jt-bg-elev) 95%, transparent)",
+          backdropFilter: "blur(12px)",
+          borderTop: "1px solid var(--jt-border-2)",
+          padding: "12px 16px",
+          zIndex: 9,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 880,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <Link
+            href={
+              isEditing && application
+                ? `/applications/${application.id}`
+                : "/applications"
+            }
+          >
+            <JtButton variant="ghost" type="button">
+              Cancel
+            </JtButton>
+          </Link>
+          <JtButton type="submit" size="md" disabled={submitting} iconRight={submitting ? undefined : undefined}>
+            {submitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                {isEditing ? "Saving…" : "Adding…"}
+              </>
+            ) : isEditing ? (
+              "Save changes"
+            ) : (
+              "Add application"
+            )}
+          </JtButton>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+/* ---------- subcomponents ---------- */
+
+function FormCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        background: "var(--jt-bg-elev)",
+        border: "1px solid var(--jt-border)",
+        borderRadius: "var(--r-lg)",
+        padding: 24,
+        marginBottom: 16,
+      }}
+    >
+      <div style={{ marginBottom: 18 }}>
+        <h2
+          style={{
+            fontSize: 16,
+            fontWeight: 600,
+            letterSpacing: "-0.015em",
+            margin: 0,
+          }}
+        >
+          {title}
+        </h2>
+        {description && (
+          <p style={{ fontSize: 13, color: "var(--jt-text-2)", margin: "4px 0 0" }}>
+            {description}
+          </p>
+        )}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>{children}</div>
+    </div>
+  );
+}
+
+function Row({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="jt-form-row"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr",
+        gap: 16,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Field({
+  label,
+  required,
+  optional,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--jt-text)", letterSpacing: "-0.005em" }}>
+          {label}
+        </span>
+        {required && (
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--p-600)",
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Required
+          </span>
+        )}
+        {optional && (
+          <span style={{ fontSize: 11, color: "var(--jt-text-3)" }}>Optional</span>
+        )}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function PillToggle({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: string; label: string }[];
+  value?: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            className="focus-ring"
+            style={{
+              padding: "8px 14px",
+              borderRadius: "var(--r-md)",
+              border: active ? "1.5px solid var(--p-500)" : "1.5px solid var(--jt-border)",
+              background: active ? "var(--p-50)" : "var(--jt-bg-elev)",
+              color: active ? "var(--p-700)" : "var(--jt-text)",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "all 120ms var(--jt-ease)",
+            }}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ResumeDrop({
+  file,
+  path,
+  busy,
+  onPick,
+  onClear,
+}: {
+  file: File | null;
+  path: string;
+  busy: boolean;
+  onPick: (f: File) => void;
+  onClear: () => void;
+}) {
+  const [drag, setDrag] = React.useState(false);
+  const ref = React.useRef<HTMLInputElement>(null);
+  const handleSelect = () => ref.current?.click();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) onPick(f);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDrag(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) onPick(f);
+  };
+  const hasFile = file || path;
+  return (
+    <div>
+      <input
+        ref={ref}
+        type="file"
+        accept="application/pdf"
+        onChange={handleChange}
+        style={{ display: "none" }}
+      />
+      <div
+        onClick={handleSelect}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={handleDrop}
+        style={{
+          padding: "20px 16px",
+          background: drag ? "var(--p-50)" : "var(--jt-bg-sunk)",
+          border: drag ? "1.5px dashed var(--p-500)" : "1.5px dashed var(--jt-border)",
+          borderRadius: "var(--r-md)",
+          textAlign: "center",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        {hasFile ? (
+          <>
+            <FileText size={22} color="var(--p-500)" />
+            <div style={{ fontSize: 13, fontWeight: 500 }}>
+              {file ? file.name : "Existing resume attached"}
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--jt-text-3)",
+                fontSize: 12,
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+            >
+              {busy ? "Uploading…" : "Replace"}
+            </button>
+          </>
+        ) : (
+          <>
+            <Upload size={22} color="var(--jt-text-3)" />
+            <div style={{ fontSize: 13, fontWeight: 500 }}>
+              Drag a PDF here, or click to upload
+            </div>
+            <div style={{ fontSize: 12, color: "var(--jt-text-3)" }}>
+              PDF only, up to 2 MB
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  height: 40,
+  padding: "0 12px",
+  background: "var(--jt-bg-elev)",
+  border: "1.5px solid var(--jt-border)",
+  borderRadius: "var(--r-md)",
+  color: "var(--jt-text)",
+  fontSize: 14,
+  fontFamily: "var(--font-sans)",
+  letterSpacing: "-0.005em",
+  outline: "none",
+  width: "100%",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: "none",
+  WebkitAppearance: "none",
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238E90A8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 10px center",
+  paddingRight: 32,
+};
+
+/* ---------- Helpers ---------- */
+
+function parseSalary(value?: string): { currency: string; amount: string } {
+  const defaults = { currency: "USD", amount: "" };
+  if (!value) return defaults;
+  const currencyMatch = value.match(/\b(USD|EUR|GBP|TRY|CAD|AUD|CHF|JPY|INR)\b/);
+  const numbers = value.match(/\d[\d,.]*/g) || [];
+  return {
+    currency: currencyMatch?.[1] || defaults.currency,
+    amount: numbers[0]?.replace(/,/g, "") || "",
+  };
+}
+

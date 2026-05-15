@@ -1,51 +1,45 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { ApplicationForm } from "@/components/applications/application-form";
-import { useApplicationStore } from "@/store";
-import { useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 
+import { JtApplicationForm } from "@/components/jt/application-form";
+import { JtButton } from "@/components/jt/primitives";
+import { useApplicationStore } from "@/store";
+
 export default function EditApplicationPage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const { getApplicationById, fetchApplications, _hasHydrated, isLoading } =
     useApplicationStore();
 
   useEffect(() => {
-    if (!_hasHydrated) {
-      fetchApplications();
-    }
+    if (!_hasHydrated) fetchApplications();
   }, [_hasHydrated, fetchApplications]);
 
-  const application = getApplicationById(params.id as string);
+  const application = getApplicationById(params?.id || "");
 
   if (!_hasHydrated || isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "80px 20px", textAlign: "center" }}>
+        <p style={{ color: "var(--jt-text-2)" }}>Loading…</p>
+      </main>
     );
   }
 
   if (!application) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <p className="text-muted-foreground">Application not found</p>
-        <Link href="/applications" className="mt-4">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Applications
-          </Button>
+      <main style={{ maxWidth: 720, margin: "0 auto", padding: "80px 20px", textAlign: "center" }}>
+        <p style={{ color: "var(--jt-text-2)", marginBottom: 16 }}>Application not found.</p>
+        <Link href="/applications">
+          <JtButton variant="secondary" icon={<ArrowLeft size={14} />}>
+            Back to applications
+          </JtButton>
         </Link>
-      </div>
+      </main>
     );
   }
 
-  return (
-    <div className="max-w-3xl mx-auto">
-      <ApplicationForm application={application} isEditing />
-    </div>
-  );
+  return <JtApplicationForm application={application} isEditing />;
 }
