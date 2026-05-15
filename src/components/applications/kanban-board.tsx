@@ -76,7 +76,7 @@ export function KanbanBoard({ applications }: KanbanBoardProps) {
     <div
       ref={boardRef}
       onDragOver={handleBoardDragOver}
-      className="flex gap-4 overflow-x-auto pb-2"
+      className="jt-kanban-scroll flex gap-4 overflow-x-auto pb-3"
     >
       {STATUS_ORDER.map((status) => {
         const statusApps = applications.filter(

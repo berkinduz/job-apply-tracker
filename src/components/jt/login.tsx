@@ -162,22 +162,16 @@ export function JtLogin() {
         flexDirection: "column",
       }}
     >
-      {/* Top thin header for mobile */}
+      {/* Top thin header for mobile — just a back link; brand logo lives in the form panel/aside */}
       <header
         className="jt-only-mobile"
         style={{
-          padding: "16px 20px",
+          padding: "14px 20px 0",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
         }}
       >
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-          <JtLogo size={22} />
-          <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: "-0.02em" }}>
-            jobtrack
-          </span>
-        </Link>
         <Link
           href="/"
           style={{ fontSize: 13, color: "var(--jt-text-3)" }}

@@ -29,7 +29,10 @@ export const metadata: Metadata = {
   keywords: siteConfig.keywords,
   applicationName: siteConfig.name,
   icons: {
-    icon: "/favicon.ico?v=4",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
   },
   openGraph: {
     type: "website",

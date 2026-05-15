@@ -347,6 +347,57 @@
   .jt-form-row { grid-template-columns: 1fr 1fr !important; }
 }
 
+/* Form submit bar — fixed banner on mobile, inline on desktop */
+.jt-form-submit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: color-mix(in oklab, var(--jt-bg-elev) 95%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--jt-border-2);
+  padding: 12px 16px;
+  z-index: 9;
+}
+@media (min-width: 768px) {
+  .jt-form-submit-bar {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    border-top: none;
+    padding: 8px 16px 32px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+}
+
+/* Kanban — always-visible horizontal scrollbar so users discover the extra columns */
+.jt-kanban-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--jt-border) transparent;
+  scroll-snap-type: x proximity;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+.jt-kanban-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+.jt-kanban-scroll::-webkit-scrollbar-track {
+  background: var(--jt-bg-sunk);
+  border-radius: 99px;
+}
+.jt-kanban-scroll::-webkit-scrollbar-thumb {
+  background: var(--jt-border);
+  border-radius: 99px;
+  border: 2px solid var(--jt-bg-sunk);
+}
+.jt-kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--jt-text-3);
+}
+.jt-kanban-scroll > * {
+  scroll-snap-align: start;
+}
+
 /* Analytics responsive grids */
 @media (min-width: 768px) {
   .jt-analytics-grid { grid-template-columns: 1fr 1fr !important; }

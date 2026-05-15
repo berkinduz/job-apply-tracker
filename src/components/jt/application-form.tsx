@@ -755,20 +755,8 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
         </FormCard>
       </div>
 
-      {/* Sticky submit bar */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: "color-mix(in oklab, var(--jt-bg-elev) 95%, transparent)",
-          backdropFilter: "blur(12px)",
-          borderTop: "1px solid var(--jt-border-2)",
-          padding: "12px 16px",
-          zIndex: 9,
-        }}
-      >
+      {/* Submit bar — sticky banner on mobile, inline footer on desktop */}
+      <div className="jt-form-submit-bar">
         <div
           style={{
             maxWidth: 880,
@@ -885,15 +873,15 @@ function Field({
         </span>
         {required && (
           <span
+            aria-hidden="true"
             style={{
-              fontSize: 11,
-              color: "var(--p-600)",
-              fontWeight: 500,
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
+              fontSize: 13,
+              color: "var(--st-rejected, #e11d48)",
+              fontWeight: 600,
+              lineHeight: 1,
             }}
           >
-            Required
+            *
           </span>
         )}
         {optional && (

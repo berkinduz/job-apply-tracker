@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import {
   ArrowRight,
   Sparkles,
@@ -18,6 +20,9 @@ import {
   List as ListIcon,
   Columns3 as KanbanIcon,
   BarChart3,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 
 import {
@@ -91,6 +96,7 @@ function LandingHeader() {
             <a href="#compare">Compare</a>
             <a href="#faq">FAQ</a>
           </nav>
+          <ThemeMenu />
           <Link href="/login" className="hidden sm:inline">
             <JtButton variant="ghost" size="sm">
               Sign in
@@ -102,6 +108,88 @@ function LandingHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+function ThemeMenu() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [open, setOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const active = mounted ? (theme === "system" ? "system" : resolvedTheme) : "system";
+  const Icon = active === "dark" ? Moon : active === "light" ? Sun : Monitor;
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        aria-label="Theme"
+        className="focus-ring"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        style={{
+          width: 34,
+          height: 34,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "transparent",
+          border: "1px solid var(--jt-border)",
+          borderRadius: "var(--r-md)",
+          color: "var(--jt-text-2)",
+          cursor: "pointer",
+        }}
+      >
+        <Icon size={15} />
+      </button>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            right: 0,
+            background: "var(--jt-bg-elev)",
+            border: "1px solid var(--jt-border)",
+            borderRadius: "var(--r-md)",
+            boxShadow: "var(--sh-md)",
+            padding: 4,
+            minWidth: 140,
+            zIndex: 30,
+          }}
+        >
+          {([
+            { v: "light", label: "Light", Icon: Sun },
+            { v: "dark", label: "Dark", Icon: Moon },
+            { v: "system", label: "System", Icon: Monitor },
+          ] as const).map((opt) => (
+            <button
+              key={opt.v}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setTheme(opt.v);
+                setOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                width: "100%",
+                padding: "7px 10px",
+                background: theme === opt.v ? "var(--jt-bg-sunk)" : "transparent",
+                border: "none",
+                borderRadius: "var(--r-sm)",
+                fontSize: 13,
+                color: "var(--jt-text)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <opt.Icon size={14} /> {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -443,35 +531,77 @@ function Preview() {
           onChange={setTab}
         />
       </div>
-      <div
-        className="striped"
-        style={{
-          background: "var(--jt-bg-elev)",
-          border: "1px solid var(--jt-border)",
-          borderRadius: "var(--r-xl)",
-          overflow: "hidden",
-          height: 460,
-          minHeight: 280,
-          boxShadow: "var(--sh-md)",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            gap: 12,
-            color: "var(--jt-text-3)",
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-          }}
-        >
-          <Eye size={28} />[ {tab} view screenshot — 1440×900 ]
-        </div>
-      </div>
+      <PreviewMedia tab={tab} />
     </section>
+  );
+}
+
+function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const isDark = mounted ? resolvedTheme === "dark" : false;
+  const variant = isDark ? "dark" : "light";
+
+  const sources: Record<typeof tab, { type: "image" | "video"; src: string; alt: string }> = {
+    track: {
+      type: "image",
+      src: `/dashboard-preview_${variant}.png`,
+      alt: "Applications list view",
+    },
+    visual: {
+      type: "video",
+      src: `/kanban_${variant}.webm`,
+      alt: "Kanban board view",
+    },
+    learn: {
+      type: "image",
+      src: `/analytics_${variant}.png`,
+      alt: "Analytics view",
+    },
+  };
+  const media = sources[tab];
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        background: "var(--jt-bg-elev)",
+        border: "1px solid var(--jt-border)",
+        borderRadius: "var(--r-xl)",
+        overflow: "hidden",
+        boxShadow: "var(--sh-md)",
+        aspectRatio: "16 / 9",
+      }}
+    >
+      {media.type === "image" ? (
+        <Image
+          key={media.src}
+          src={media.src}
+          alt={media.alt}
+          fill
+          sizes="(max-width: 1280px) 100vw, 1280px"
+          style={{ objectFit: "cover", objectPosition: "top" }}
+          priority={tab === "track"}
+        />
+      ) : (
+        <video
+          key={media.src}
+          src={media.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      )}
+    </div>
   );
 }
 
