@@ -1,5 +1,5 @@
-import { ApplicationsList } from "@/components/applications/applications-list";
+import { JtApplicationsPage } from "@/components/jt/applications-page";
 
 export default function ApplicationsPage() {
-  return <ApplicationsList />;
+  return <JtApplicationsPage />;
 }

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SettingsLayout({
+export default function AnalyticsLayout({
   children,
 }: {
   children: React.ReactNode;

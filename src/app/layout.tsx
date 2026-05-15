@@ -5,8 +5,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getLocale } from "next-intl/server";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthToastListener } from "@/components/layout/auth-toast-listener";
 import { Analytics } from "@vercel/analytics/next";
@@ -25,13 +23,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.title,
-    template: "%s | JobTrack",
+    template: "%s · JobTrack",
   },
   description: siteConfig.description,
   keywords: siteConfig.keywords,
   applicationName: siteConfig.name,
   icons: {
-    icon: "/favicon.ico?v=3",
+    icon: "/favicon.ico?v=4",
   },
   openGraph: {
     type: "website",
@@ -68,13 +66,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={messages}>
-            <div className="relative min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            {children}
             <AuthToastListener />
             <Toaster />
           </NextIntlClientProvider>

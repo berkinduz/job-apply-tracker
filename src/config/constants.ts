@@ -1,49 +1,56 @@
 import { ApplicationStatus, WorkType } from "@/types";
 
-// Status configuration with colors and labels
+/**
+ * Status configuration — colors map to the JobTrack design system
+ * (see globals.css for the underlying CSS variables).
+ *
+ * NOTE: `color` and `bgColor` keep the Tailwind class format that some
+ * legacy components still consume, but UI redesigned with the new
+ * JT primitives reads from STATUS_TOKENS in `@/components/jt/primitives`.
+ */
 export const STATUS_CONFIG: Record<
   ApplicationStatus,
   { label: string; color: string; bgColor: string }
 > = {
   applied: {
     label: "Applied",
-    color: "text-emerald-700 dark:text-emerald-400",
-    bgColor: "bg-emerald-100 dark:bg-emerald-950",
+    color: "text-slate-700 dark:text-slate-300",
+    bgColor: "bg-slate-100 dark:bg-slate-900",
   },
   test_case: {
     label: "Test Case",
-    color: "text-purple-700 dark:text-purple-400",
-    bgColor: "bg-purple-100 dark:bg-purple-950",
+    color: "text-violet-700 dark:text-violet-300",
+    bgColor: "bg-violet-100 dark:bg-violet-950",
   },
   hr_interview: {
     label: "HR Interview",
-    color: "text-cyan-700 dark:text-cyan-400",
+    color: "text-cyan-700 dark:text-cyan-300",
     bgColor: "bg-cyan-100 dark:bg-cyan-950",
   },
   technical_interview: {
     label: "Technical Interview",
-    color: "text-orange-700 dark:text-orange-400",
-    bgColor: "bg-orange-100 dark:bg-orange-950",
+    color: "text-indigo-700 dark:text-indigo-300",
+    bgColor: "bg-indigo-100 dark:bg-indigo-950",
   },
   management_interview: {
     label: "Management Interview",
-    color: "text-indigo-700 dark:text-indigo-400",
-    bgColor: "bg-indigo-100 dark:bg-indigo-950",
+    color: "text-fuchsia-700 dark:text-fuchsia-300",
+    bgColor: "bg-fuchsia-100 dark:bg-fuchsia-950",
   },
   offer: {
     label: "Offer",
-    color: "text-amber-700 dark:text-amber-400",
+    color: "text-amber-700 dark:text-amber-300",
     bgColor: "bg-amber-100 dark:bg-amber-950",
   },
   accepted: {
     label: "Accepted",
-    color: "text-green-700 dark:text-green-400",
-    bgColor: "bg-green-100 dark:bg-green-950",
+    color: "text-emerald-700 dark:text-emerald-300",
+    bgColor: "bg-emerald-100 dark:bg-emerald-950",
   },
   rejected: {
     label: "Rejected",
-    color: "text-red-700 dark:text-red-400",
-    bgColor: "bg-red-100 dark:bg-red-950",
+    color: "text-rose-700 dark:text-rose-300",
+    bgColor: "bg-rose-100 dark:bg-rose-950",
   },
 };
 

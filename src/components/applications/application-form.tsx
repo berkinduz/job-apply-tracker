@@ -93,7 +93,7 @@ const MAX_RESUME_SIZE = 2 * 1024 * 1024;
 
 const extractCurrency = (value?: string) => {
   if (!value) return defaultCurrency;
-  const match = value.match(new RegExp(`\b(${currencyOptions.join("|")})\b`));
+  const match = value.match(new RegExp(`\\b(${currencyOptions.join("|")})\\b`));
   if (match?.[1]) return match[1];
   if (value.includes("$")) return "USD";
   if (value.toLowerCase().includes("tl") || value.toLowerCase().includes("try")) {

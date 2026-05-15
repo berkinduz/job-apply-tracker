@@ -1,7 +1,7 @@
 "use client";
 
-import { ApplicationDetail } from "@/components/applications/application-detail";
+import { JtApplicationDetail } from "@/components/jt/application-detail";
 
 export default function ApplicationDetailPage() {
-  return <ApplicationDetail />;
+  return <JtApplicationDetail />;
 }
