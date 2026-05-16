@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { JtSettings } from "@/components/jt/settings";
 import { createClient } from "@/lib/supabase/server";
+import { getOwnPublicProfileSettings } from "@/app/settings/public-profile-actions";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -14,5 +15,13 @@ export default async function SettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  return <JtSettings userEmail={user.email} />;
+  const publicProfile = (await getOwnPublicProfileSettings()) || {
+    enabled: false,
+    handle: null,
+    showCompanies: false,
+    displayName: null,
+  };
+  return (
+    <JtSettings userEmail={user.email} publicProfileInitial={publicProfile} />
+  );
 }

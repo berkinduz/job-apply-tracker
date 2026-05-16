@@ -207,7 +207,16 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
    detayı) → confirm → bulk insert. Settings'te "Import from CSV" butonu;
    onboarding'de "Import from a CSV" seçeneği "CSV ready" tag'iyle aktif.
    Sample CSV download da dahil.
-7. **Public profile / share** — viral loop. `jobtrack.com/u/berkin` → kullanıcının funnel istatistikleri (sayılar değil yüzdeler).
+7. ~~**Public profile / share**~~ DONE. `user_settings.public_handle/enabled/
+   show_companies/display_name` columns + unique partial index + handle format
+   constraint + reserved-name list (admin/api/login/etc). Server actions için
+   `checkHandle` + `savePublicProfile` + `getOwnPublicProfileSettings`. RSC
+   `/u/[handle]` sayfası — admin client ile aggregate stats (funnel %, response
+   rate, offers, streak, top sources, opsiyonel highlights) çekiyor; raw row'
+   lar asla expose edilmiyor. Dynamic OG image `/u/[handle]/og` (1200×630
+   gradient + funnel %). Settings'te `PublicProfileCard`: toggle + handle picker
+   (live availability check) + display name + show-companies toggle + copy link.
+   Sitemap opted-in handle'ları otomatik index'liyor.
 8. ~~**Klavye kısayolları (Cmd+K palette)**~~ — DONE. cmdk dialog ile gerçek
    command palette: quick actions + tüm başvurularda full-text search.
 

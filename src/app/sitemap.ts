@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url.replace(/\/$/, "");
   const now = new Date();
-  // Only public, marketing-facing routes belong in the sitemap.
-  // Authed routes are blocked in robots.txt and noindex'd via per-page metadata.
-  return [
+  // Marketing routes — always included.
+  const entries: MetadataRoute.Sitemap = [
     {
       url: `${base}/`,
       lastModified: now,
@@ -32,4 +34,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.3,
     },
   ];
+
+  // Public user profiles — only those opted-in. Skip silently if admin
+  // client is unavailable (e.g. local dev without service role key).
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("user_settings")
+      .select("public_handle, updated_at")
+      .eq("public_enabled", true)
+      .not("public_handle", "is", null)
+      .limit(1000);
+    for (const row of data || []) {
+      if (!row.public_handle) continue;
+      entries.push({
+        url: `${base}/u/${row.public_handle}`,
+        lastModified: row.updated_at ? new Date(row.updated_at) : now,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      });
+    }
+  } catch {
+    // Service role missing locally — fine, prod sitemap will fill in.
+  }
+
+  return entries;
 }

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { JtButton, JtPill } from "@/components/jt/primitives";
 import { createClient } from "@/lib/supabase/client";
 import { CsvImportDialog } from "@/components/jt/csv-import-dialog";
+import { PublicProfileCard } from "@/components/jt/public-profile-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +34,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSettingsStore, useApplicationStore } from "@/store";
 
-export function JtSettings({ userEmail }: { userEmail?: string | null }) {
+export function JtSettings({
+  userEmail,
+  publicProfileInitial,
+}: {
+  userEmail?: string | null;
+  publicProfileInitial?: {
+    enabled: boolean;
+    handle: string | null;
+    showCompanies: boolean;
+    displayName: string | null;
+  };
+}) {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const t = useTranslations();
@@ -150,6 +162,15 @@ export function JtSettings({ userEmail }: { userEmail?: string | null }) {
           <FollowUpEmailToggle />
         </Field>
       </Card>
+
+      {publicProfileInitial && (
+        <Card
+          title="Public profile"
+          description="Optional — share a read-only stats page at jobtrack.com/u/your-handle."
+        >
+          <PublicProfileCard initial={publicProfileInitial} />
+        </Card>
+      )}
 
       <Card title="Customization" description="Bend the app to your search style.">
         <Field label="Sources" hint="Anywhere you find jobs — LinkedIn, referrals, alumni groups, niche boards.">

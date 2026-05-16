@@ -66,6 +66,10 @@ export interface Database {
           custom_sources: string[];
           custom_industries: string[];
           follow_up_emails: boolean;
+          public_handle: string | null;
+          public_enabled: boolean;
+          public_show_companies: boolean;
+          public_display_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -76,6 +80,10 @@ export interface Database {
           custom_sources?: string[];
           custom_industries?: string[];
           follow_up_emails?: boolean;
+          public_handle?: string | null;
+          public_enabled?: boolean;
+          public_show_companies?: boolean;
+          public_display_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -86,6 +94,10 @@ export interface Database {
           custom_sources?: string[];
           custom_industries?: string[];
           follow_up_emails?: boolean;
+          public_handle?: string | null;
+          public_enabled?: boolean;
+          public_show_companies?: boolean;
+          public_display_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };
