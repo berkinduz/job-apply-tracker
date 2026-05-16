@@ -232,26 +232,6 @@ function SearchTrigger() {
           <span className="kbd">K</span>
         </span>
       </button>
-      <button
-        type="button"
-        aria-label="Search"
-        className="focus-ring md:hidden"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 36,
-          height: 36,
-          background: "var(--jt-bg-sunk)",
-          border: "1px solid var(--jt-border)",
-          borderRadius: "var(--r-md)",
-          color: "var(--jt-text-2)",
-          cursor: "pointer",
-        }}
-        onClick={() => setOpen(true)}
-      >
-        <Search size={16} />
-      </button>
       <CommandDialog open={open} onOpenChange={setOpen} title="Search" description="Jump to an application or page">
         <CommandInput placeholder="Search applications, jump to a page…" />
         <CommandList>
