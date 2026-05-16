@@ -70,24 +70,20 @@ DELETE FROM auth.users WHERE email = 'design-review@jobtrack.local';
 
 ## 2. Domain & Marka
 
-### 2.1 Favicon, app icons, apple-touch-icon
-Mevcut `/public/favicon.ico` (eski briefcase) kalmış. Yenisini üretmek gerekiyor:
-- Brand mark: target+check, **#5A5DE8** indigo
-- Boyutlar: 16, 32, 192, 512, apple-touch-icon (180×180)
-- **Araç:** https://realfavicongenerator.net veya Figma export
-- Yerleştir: `/public/favicon.ico`, `/public/icon.png`, `/public/apple-icon.png`
-
-Next.js bunları otomatik bağlar (`/app/icon.png`, `/app/apple-icon.png` koysan
-daha temiz).
+### 2.1 Favicon, app icons, apple-touch-icon — DONE
+`src/app/icon.svg` (indigo brand mark) + `src/app/apple-icon.tsx` (180×180 dynamic
+PNG via ImageResponse) hazır. Eski briefcase favicon.ico'lar (`public/`, `src/app/`)
+silindi. Next.js otomatik bağlıyor. Modern tarayıcılar SVG'yi alır; iOS apple-icon
+endpoint'inden PNG çeker.
 
 ### 2.2 OG image
 Dinamik OG image `src/app/opengraph-image.tsx` üzerinden generate ediliyor (Edge runtime). Twitter / Facebook bunu çekiyor. Çalışıyor.
 **Doğrulama:** https://www.opengraph.xyz/url/https%3A%2F%2Fjobapplytracker.com
 
-### 2.3 PWA manifest (henüz eklenmedi)
-İleride PWA installable olması için:
-- `/public/manifest.json` ekle (name, short_name, theme_color #5A5DE8, icons)
-- `/app/layout.tsx`'te `metadata.manifest = "/manifest.json"` ekle
+### 2.3 PWA manifest — DONE
+`src/app/manifest.ts` Next.js dinamik manifest endpoint'i (`/manifest.webmanifest`)
+sağlıyor. Layout metadata `manifest: "/manifest.webmanifest"` linkliyor. Icon
+referansları: SVG (any + maskable) + dynamic 180×180 apple-icon. PWA installable.
 
 ---
 
@@ -131,19 +127,27 @@ landing'in "your data is yours" mesajıyla uyumlu. Kurulum 5 dakika.
 - Resources → Templates / Compare vs. Teal / Compare vs. Notion / Blog (route yok)
 - Company → About / Contact / Privacy / Terms (gerçek sayfalar yapılmalı)
 
-**Aksiyon:** En azından `/privacy` ve `/terms` route'larını yarat. Şu an placeholder.
+**Aksiyon — DONE:** `/privacy` ve `/terms` route'ları + `JtLegalShell` shared
+component eklendi. Footer'daki ölü `#` linkler gerçek hrefs ile değiştirildi
+(Features/Compare/FAQ anchor + Privacy/Terms/Contact/GitHub). Login disclaimer
+da `/terms` ve `/privacy`'ye bağlı.
 
 ### 5.2 Testimonials
 `src/components/jt/landing.tsx`'te 3 placeholder testimonial var (Maya / Diego / Jules).
 Gerçek kullanıcılardan toplayınca değiştir veya PH launch sonrası "(early users)"
 notuyla koru.
 
-### 5.3 i18n (TR) çevirileri
-Yeni metinler şu an İngilizce-only. Hedef kitle TR de içeriyorsa:
-- `src/messages/tr.json` içinde yeni anahtarları çevir (landing, auth, settings, application form)
-- Component'lerde `useTranslations()` ile bağla — şu an çoğu inline string
-
-Bu sonraki iterasyon; ürün-market fit gözleyene kadar İngilizce yeter.
+### 5.3 i18n (TR) çevirileri — KISMEN
+- **Landing** (LandingHeader, Hero, Preview, Compare, FeatureSlab, Mocks, FAQ,
+  FinalCta, Footer) → `landing.*` namespace altında tamamen i18n'lendi (EN + TR).
+- **Login** (JtLogin + alt componentler) → `loginV2.*` namespace altında i18n'lendi.
+  Magic link, password strength, error mesajları dahil.
+- **Application form** (`jt/application-form.tsx`): section başlıkları/etiketleri
+  hâlâ inline EN. Sonraki iterasyon.
+- **App shell** (avatar menüsü, premium teaser, kanban/empty state'ler): hâlâ
+  inline EN. Sonraki iterasyon.
+- Landing header'a TR/EN toggle (`LangMenu`) eklendi — logged-out kullanıcı
+  da dili değiştirebiliyor.
 
 ---
 
@@ -180,7 +184,8 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 5. **Follow-up reminders** — `follow_up_date` + cron + email/push delivery.
 6. **CSV import** — onboarding 1. adımdaki "Import from CSV" karşılığı.
 7. **Public profile / share** — viral loop. `jobtrack.com/u/berkin` → kullanıcının funnel istatistikleri (sayılar değil yüzdeler).
-8. **Klavye kısayolları (Cmd+K palette)** — header'da trigger var ama palette henüz çalışmıyor.
+8. ~~**Klavye kısayolları (Cmd+K palette)**~~ — DONE. cmdk dialog ile gerçek
+   command palette: quick actions + tüm başvurularda full-text search.
 
 ---
 
@@ -216,8 +221,8 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 
 ## 10. Bilinen eksiklikler / sonraki iterasyon
 
-- **i18n (TR) çevirileri** redesigned sayfalarda henüz inline string (§5.3)
-- **Cmd+K command palette** trigger var, popup henüz yok
+- **i18n (TR) çevirileri** application-form ve app-shell kalan inline string'ler (§5.3)
+- ~~**Cmd+K command palette**~~ DONE
 - **Activity timeline** synthetic — gerçek event log tablosu eklenmeli
 - **Pipeline progress click → status değişimi** çalışıyor ama optimistic update'i henüz yok
 - **Kanban mobile** swipe pattern brief'te vardı ama henüz yapılmadı (mevcut kanban grid mobile'da yatay scroll)

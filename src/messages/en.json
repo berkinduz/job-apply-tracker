@@ -205,66 +205,187 @@
     "previewDesc": "Stop drowning in spreadsheets and scattered notes. Organize, track,and manage all your job applications in one professional dashboard."
   },
   "landing": {
-    "badge": "Built for every job seeker",
-    "title": "Track every application with total clarity.",
-    "subtitle": "JobTrack replaces messy spreadsheets with a powerful dashboard. Track your interview funnel, manage resumes, and get real-time insights into your job search.",
-    "ctaPrimary": "Start Now",
-    "ctaSecondary": "See how it works",
-    "highlights": {
-      "pipeline": "Funnel Analytics",
-      "filters": "Resume Management",
-      "theme": "Dark + light mode"
+    "nav": {
+      "features": "Features",
+      "compare": "Compare",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "getStarted": "Get started — free"
     },
-    "heroAlt": "JobTrack dashboard preview",
+    "hero": {
+      "pill": "Built for the messy job hunt",
+      "titleLine1": "Land your next role",
+      "titleLine2": "without the spreadsheet.",
+      "subtitle": "Track every application, follow up on time, and see what's actually working. Free, forever.",
+      "ctaPrimary": "Start tracking — free",
+      "ctaSecondary": "See it in action",
+      "trustNoCreditCard": "No credit card",
+      "trustOwnData": "Your data is yours",
+      "trustEuHosted": "EU-hosted"
+    },
     "preview": {
+      "pill": "Three views, one source of truth",
+      "title": "Track the pipeline. See the funnel. Find what's working.",
       "tabs": {
-        "kanban": "Kanban & Lists",
-        "detail": "Analytics"
+        "track": "Track",
+        "visualize": "Visualize",
+        "learn": "Learn"
       },
-      "alts": {
-        "kanban": "Kanban view for easy application tracking",
-        "detail": "Analytics dashboard showing response rates and charts"
+      "altTrack": "Applications list view",
+      "altVisualize": "Kanban board view",
+      "altLearn": "Analytics view"
+    },
+    "compare": {
+      "title": "JobTrack vs. that spreadsheet",
+      "subtitle": "You know the one. It started so well.",
+      "colNeed": "I need to…",
+      "colSpreadsheet": "Spreadsheet",
+      "colJobTrack": "JobTrack",
+      "rows": {
+        "find": { "need": "Find applications I sent in March", "ss": "scroll-and-pray", "jt": "Filter + search, instant" },
+        "follow": { "need": "Track follow-up dates", "ss": "Conditional formatting hell", "jt": "Auto-reminders" },
+        "rate": { "need": "See offer conversion rate", "ss": "Pivot table you'll never build", "jt": "Built in" },
+        "move": { "need": "Move an application along", "ss": "Edit a cell", "jt": "Drag on kanban" },
+        "phone": { "need": "Use on phone", "ss": "🙃", "jt": "Full mobile" }
       }
     },
     "features": {
-      "kanban": {
-        "title": "Drag-and-Drop Kanban",
-        "description": "Visualize your pipeline. Move applications from 'Applied' to 'Offer' with a simple drag."
+      "capture": {
+        "eyebrow": "Capture",
+        "title": "A job, in 30 seconds.",
+        "body": "Paste a job URL, drop a quick note, or type Company → Role. We fill in the rest — and you can always add detail later."
       },
-      "notes": {
-        "title": "Resume Management",
-        "description": "Upload and pin the specific PDF resume you used for each application."
+      "see": {
+        "eyebrow": "See",
+        "title": "Your funnel, finally legible.",
+        "body": "Watch where applications stall. Compare sources. Spot the patterns spreadsheets bury under conditional formatting."
       },
-      "insights": {
-        "title": "Analytics Dashboard",
-        "description": "Track your 'Response Rate' and see weekly activity trends to stay motivated."
-      },
-      "timeline": {
-        "title": "Timeline & Notes",
-        "description": "Log every interview contact, salary negotiation, and follow-up date."
+      "followUp": {
+        "eyebrow": "Follow up",
+        "title": "Don't ghost the ones that mattered.",
+        "body": "Stale applications surface themselves. Set a follow-up date when the moment is fresh; we remind you when it isn't."
       }
     },
-    "sections": {
-      "analytics": {
-        "title": "Data-Driven Job Search",
-        "description": "Stop guessing. See exactly how your applications are performing.",
-        "bullets": "Real-time Response Rate|Weekly Activity Charts|Application Distribution|Work Type Analysis"
-      },
-      "commandCenter": {
-        "title": "Everything in one command center",
-        "description": "Filter by status, source, or work type. Pin the applications that matter.",
-        "bullets": "Pinned focus|Multilingual|Responsive|Secure by design"
-      },
-      "dailyUse": {
-        "title": "Built for fast daily use",
-        "description": "Spend less time updating and more time interviewing.",
-        "badges": "Supabase Auth|Realtime filters|Kanban mode|Resume uploads"
+    "mocks": {
+      "quickAdd": "Quick add",
+      "quickAddSuccess": "Added Stripe — status: Applied · 18s ago",
+      "funnel": "Funnel",
+      "staleTitle": "Raycast — Mac Engineer",
+      "staleBody": "Applied 3 weeks ago · no movement",
+      "staleTag": "Stale",
+      "staleReminder": "We'll nudge you on Thursday so this doesn't slip again."
+    },
+    "faq": {
+      "title": "Frequently asked.",
+      "items": {
+        "free": {
+          "q": "Is it actually free?",
+          "a": "Yes, forever. No trial, no surprise tier, no upsells. If we ever add paid features they'll be additive — your existing tracking will always work."
+        },
+        "data": {
+          "q": "Where does my data live?",
+          "a": "Supabase, hosted in the EU. You can export everything to CSV or JSON anytime, and deleting your account wipes it for real."
+        },
+        "import": {
+          "q": "Can I import from a spreadsheet?",
+          "a": "CSV import is here. Notion and Google Sheets paste-in is on the roadmap — you can also forward a job listing email to your inbox once we ship that."
+        },
+        "mobile": {
+          "q": "Does it work on phones?",
+          "a": "Yes — full mobile, installable as a PWA. Native apps are not on the near roadmap; the web app does what you need."
+        },
+        "email": {
+          "q": "Will I get marketing emails?",
+          "a": "Zero. The only mail you'll get is follow-up reminders you opted into and the weekly summary you can disable."
+        },
+        "delete": {
+          "q": "Can I delete my account?",
+          "a": "Anytime, from Settings → Data. Deleting wipes your applications, notes, and settings for real."
+        }
       }
     },
-    "ctaBottom": {
-      "title": "Ready to land your next role?",
-      "description": "Join other developers who organize their job search with JobTrack.",
-      "button": "Start tracking now"
+    "finalCta": {
+      "pill": "Built by job seekers, for job seekers",
+      "title": "Ready when you are.",
+      "subtitle": "Sign up takes 30 seconds. Tracking your first application takes another 20.",
+      "ctaPrimary": "Create your account",
+      "ctaSecondary": "Star on GitHub"
+    },
+    "footer": {
+      "tagline": "Your job hunt's command center. Free, forever.",
+      "colProduct": "Product",
+      "colCompany": "Company",
+      "links": {
+        "features": "Features",
+        "compare": "Compare",
+        "faq": "FAQ",
+        "signIn": "Sign in",
+        "contact": "Contact",
+        "github": "GitHub",
+        "privacy": "Privacy",
+        "terms": "Terms"
+      },
+      "copyright": "© 2026 JobTrack · Built by Berkin Duz",
+      "linkedIn": "LinkedIn"
     }
+  },
+  "loginV2": {
+    "headingSignIn": "Welcome back.",
+    "headingSignUp": "Let's get you tracking.",
+    "headingMagic": "Sign in without a password.",
+    "sublineSignIn": "Pick up where you left off.",
+    "sublineSignUp": "30-second signup. Free, forever.",
+    "sublineMagic": "We'll email you a one-tap sign-in link.",
+    "fieldEmail": "Email",
+    "fieldEmailPlaceholder": "you@example.com",
+    "fieldPassword": "Password",
+    "passwordPlaceholder": "••••••••",
+    "forgot": "Forgot?",
+    "buttonSignIn": "Sign in with email",
+    "buttonSignUp": "Create account",
+    "buttonMagicSend": "Email me a sign-in link",
+    "buttonSigningIn": "Signing in…",
+    "buttonCreating": "Creating account…",
+    "buttonSending": "Sending…",
+    "magicSwitchToMagic": "Or email me a magic link instead →",
+    "magicSwitchToPassword": "← Use a password instead",
+    "divider": "Or continue with",
+    "oauthGoogle": "Google",
+    "oauthGithub": "GitHub",
+    "promptNew": "New here?",
+    "promptExisting": "Already have an account?",
+    "promptSignUp": "Create an account →",
+    "promptSignIn": "Sign in →",
+    "agreePrefix": "By continuing you agree to our",
+    "agreeTerms": "Terms",
+    "agreeAnd": "and",
+    "agreePrivacy": "Privacy Policy",
+    "magicSentTitle": "Check your inbox.",
+    "magicSentBody": "We sent a sign-in link to {email}. It expires in 15 minutes.",
+    "magicSentTip": "Tip: don't forget to check spam.",
+    "magicSentBack": "← Use a different email",
+    "errors": {
+      "fillEmailPassword": "Email and password are required",
+      "passwordMinLength": "Password should be at least 8 characters",
+      "fillEmail": "Email is required",
+      "invalidCredentials": "Email or password isn't right. Try again or reset.",
+      "notConfirmed": "Confirm your email first — check your inbox.",
+      "generic": "Something went wrong"
+    },
+    "signupSuccess": "Check your inbox to confirm your email.",
+    "magicSentToast": "Magic link sent — check your inbox.",
+    "passwordStrength": {
+      "tooShort": "Too short",
+      "weak": "Weak",
+      "okay": "Okay",
+      "strong": "Strong",
+      "veryStrong": "Very strong"
+    },
+    "homeLink": "← Home",
+    "quotes": [
+      { "quote": "I went from 'Excel chaos' to 'I know exactly what's pending' in one evening.", "name": "Maya P.", "role": "Frontend Engineer · bootcamp grad" },
+      { "quote": "The funnel view made me realize cold applications were a waste. Pivoted to referrals — got 3 offers.", "name": "Diego R.", "role": "Backend Engineer" },
+      { "quote": "Stale reminders alone saved two interview rounds I would have ghosted.", "name": "Jules T.", "role": "Product Designer" }
+    ]
   }
 }

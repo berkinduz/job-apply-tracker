@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import {
   ArrowRight,
   Sparkles,
@@ -59,6 +60,7 @@ export function JtLanding() {
 }
 
 function LandingHeader() {
+  const t = useTranslations("landing.nav");
   return (
     <header
       style={{
@@ -92,18 +94,19 @@ function LandingHeader() {
             className="hidden md:flex"
             style={{ gap: 22, fontSize: 14, color: "var(--jt-text-2)", marginRight: 16 }}
           >
-            <a href="#features">Features</a>
-            <a href="#compare">Compare</a>
-            <a href="#faq">FAQ</a>
+            <a href="#features">{t("features")}</a>
+            <a href="#compare">{t("compare")}</a>
+            <a href="#faq">{t("faq")}</a>
           </nav>
           <ThemeMenu />
+          <LangMenu />
           <Link href="/login" className="hidden sm:inline">
             <JtButton variant="ghost" size="sm">
-              Sign in
+              {t("signIn")}
             </JtButton>
           </Link>
           <Link href="/login">
-            <JtButton size="sm">Get started — free</JtButton>
+            <JtButton size="sm">{t("getStarted")}</JtButton>
           </Link>
         </div>
       </div>
@@ -193,7 +196,96 @@ function ThemeMenu() {
   );
 }
 
+function LangMenu() {
+  const [open, setOpen] = React.useState(false);
+  const [locale, setLocaleState] = React.useState<"en" | "tr">("en");
+  React.useEffect(() => {
+    const m = document.cookie.match(/(?:^|; )locale=([^;]+)/);
+    if (m) setLocaleState(m[1] === "tr" ? "tr" : "en");
+  }, []);
+  const set = (next: "en" | "tr") => {
+    document.cookie = `locale=${next};path=/;max-age=31536000`;
+    setLocaleState(next);
+    setOpen(false);
+    window.location.reload();
+  };
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        aria-label="Language"
+        className="focus-ring"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        style={{
+          height: 34,
+          padding: "0 10px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          background: "transparent",
+          border: "1px solid var(--jt-border)",
+          borderRadius: "var(--r-md)",
+          color: "var(--jt-text-2)",
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0.04em",
+          cursor: "pointer",
+          textTransform: "uppercase",
+        }}
+      >
+        {locale}
+      </button>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            right: 0,
+            background: "var(--jt-bg-elev)",
+            border: "1px solid var(--jt-border)",
+            borderRadius: "var(--r-md)",
+            boxShadow: "var(--sh-md)",
+            padding: 4,
+            minWidth: 120,
+            zIndex: 30,
+          }}
+        >
+          {[
+            { v: "en" as const, label: "English" },
+            { v: "tr" as const, label: "Türkçe" },
+          ].map((o) => (
+            <button
+              key={o.v}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                set(o.v);
+              }}
+              style={{
+                display: "block",
+                width: "100%",
+                padding: "7px 10px",
+                background: locale === o.v ? "var(--jt-bg-sunk)" : "transparent",
+                border: "none",
+                borderRadius: "var(--r-sm)",
+                fontSize: 13,
+                color: "var(--jt-text)",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Hero() {
+  const t = useTranslations("landing.hero");
   return (
     <section
       style={{
@@ -218,7 +310,7 @@ function Hero() {
             color="var(--p-700)"
             icon={<Sparkles size={12} />}
           >
-            Built for the messy job hunt
+            {t("pill")}
           </JtPill>
           <h1
             style={{
@@ -231,11 +323,9 @@ function Hero() {
               textWrap: "balance",
             }}
           >
-            Land your next role
+            {t("titleLine1")}
             <br />
-            <span style={{ color: "var(--jt-text-2)" }}>
-              without the spreadsheet.
-            </span>
+            <span style={{ color: "var(--jt-text-2)" }}>{t("titleLine2")}</span>
           </h1>
           <p
             style={{
@@ -247,8 +337,7 @@ function Hero() {
               letterSpacing: "-0.005em",
             }}
           >
-            Track every application, follow up on time, and see what&apos;s
-            actually working. Free, forever.
+            {t("subtitle")}
           </p>
           <div
             style={{
@@ -261,12 +350,12 @@ function Hero() {
           >
             <Link href="/login">
               <JtButton size="lg" iconRight={<ArrowRight />} full>
-                Start tracking — free
+                {t("ctaPrimary")}
               </JtButton>
             </Link>
             <a href="#preview">
               <JtButton variant="secondary" size="lg" icon={<Eye />} full>
-                See it in action
+                {t("ctaSecondary")}
               </JtButton>
             </a>
           </div>
@@ -279,9 +368,9 @@ function Hero() {
               flexWrap: "wrap",
             }}
           >
-            <TrustItem>No credit card</TrustItem>
-            <TrustItem>Your data is yours</TrustItem>
-            <TrustItem>EU-hosted</TrustItem>
+            <TrustItem>{t("trustNoCreditCard")}</TrustItem>
+            <TrustItem>{t("trustOwnData")}</TrustItem>
+            <TrustItem>{t("trustEuHosted")}</TrustItem>
           </div>
         </div>
         <HeroMockup />
@@ -493,6 +582,7 @@ function HeroMockup() {
 }
 
 function Preview() {
+  const t = useTranslations("landing.preview");
   const [tab, setTab] = React.useState<"track" | "visual" | "learn">("track");
   return (
     <section
@@ -506,7 +596,7 @@ function Preview() {
     >
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <JtPill bg="var(--jt-bg-sunk)" color="var(--jt-text-2)">
-          Three views, one source of truth
+          {t("pill")}
         </JtPill>
         <h2
           style={{
@@ -517,15 +607,15 @@ function Preview() {
             textWrap: "balance",
           }}
         >
-          Track the pipeline. See the funnel. Find what&apos;s working.
+          {t("title")}
         </h2>
       </div>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
         <JtSegmented
           options={[
-            { value: "track", label: "Track", icon: <ListIcon size={14} /> },
-            { value: "visual", label: "Visualize", icon: <KanbanIcon size={14} /> },
-            { value: "learn", label: "Learn", icon: <BarChart3 size={14} /> },
+            { value: "track", label: t("tabs.track"), icon: <ListIcon size={14} /> },
+            { value: "visual", label: t("tabs.visualize"), icon: <KanbanIcon size={14} /> },
+            { value: "learn", label: t("tabs.learn"), icon: <BarChart3 size={14} /> },
           ]}
           value={tab}
           onChange={setTab}
@@ -537,6 +627,7 @@ function Preview() {
 }
 
 function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
+  const t = useTranslations("landing.preview");
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -547,17 +638,17 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
     track: {
       type: "image",
       src: `/dashboard-preview_${variant}.png`,
-      alt: "Applications list view",
+      alt: t("altTrack"),
     },
     visual: {
       type: "video",
       src: `/kanban_${variant}.webm`,
-      alt: "Kanban board view",
+      alt: t("altVisualize"),
     },
     learn: {
       type: "image",
       src: `/analytics_${variant}.png`,
-      alt: "Analytics view",
+      alt: t("altLearn"),
     },
   };
   const media = sources[tab];
@@ -606,33 +697,13 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
 }
 
 function Compare() {
-  const rows = [
-    {
-      row: "Find applications I sent in March",
-      s: "scroll-and-pray",
-      j: "Filter + search, instant",
-    },
-    {
-      row: "Track follow-up dates",
-      s: "Conditional formatting hell",
-      j: "Auto-reminders",
-    },
-    {
-      row: "See offer conversion rate",
-      s: "Pivot table you'll never build",
-      j: "Built in",
-    },
-    {
-      row: "Move an application along",
-      s: "Edit a cell",
-      j: "Drag on kanban",
-    },
-    {
-      row: "Use on phone",
-      s: "🙃",
-      j: "Full mobile",
-    },
-  ];
+  const t = useTranslations("landing.compare");
+  const keys = ["find", "follow", "rate", "move", "phone"] as const;
+  const rows = keys.map((k) => ({
+    row: t(`rows.${k}.need`),
+    s: t(`rows.${k}.ss`),
+    j: t(`rows.${k}.jt`),
+  }));
   return (
     <section
       id="compare"
@@ -649,10 +720,10 @@ function Compare() {
             textWrap: "balance",
           }}
         >
-          JobTrack vs. that spreadsheet
+          {t("title")}
         </h2>
         <p style={{ color: "var(--jt-text-2)", fontSize: 17, margin: 0 }}>
-          You know the one. It started so well.
+          {t("subtitle")}
         </p>
       </div>
       <div
@@ -678,7 +749,7 @@ function Compare() {
             letterSpacing: "0.06em",
           }}
         >
-          I need to…
+          {t("colNeed")}
         </div>
         <div
           className="hidden md:block"
@@ -694,7 +765,7 @@ function Compare() {
             background: "var(--jt-bg-sunk)",
           }}
         >
-          Spreadsheet
+          {t("colSpreadsheet")}
         </div>
         <div
           className="hidden md:block"
@@ -710,7 +781,7 @@ function Compare() {
             background: "var(--p-50)",
           }}
         >
-          JobTrack
+          {t("colJobTrack")}
         </div>
         {rows.map((r, i) => {
           const last = i === rows.length - 1;
@@ -763,30 +834,28 @@ function Compare() {
 }
 
 function FeatureSlab() {
+  const t = useTranslations("landing.features");
   const features = [
     {
-      eyebrow: "Capture",
-      title: "A job, in 30 seconds.",
-      body:
-        "Paste a job URL, drop a quick note, or type Company → Role. We fill in the rest — and you can always add detail later.",
+      eyebrow: t("capture.eyebrow"),
+      title: t("capture.title"),
+      body: t("capture.body"),
       icon: <Zap />,
       accent: "var(--p-500)",
       mock: <MockCapture />,
     },
     {
-      eyebrow: "See",
-      title: "Your funnel, finally legible.",
-      body:
-        "Watch where applications stall. Compare sources. Spot the patterns spreadsheets bury under conditional formatting.",
+      eyebrow: t("see.eyebrow"),
+      title: t("see.title"),
+      body: t("see.body"),
       icon: <TrendingUp />,
       accent: "var(--a-500)",
       mock: <MockFunnel />,
     },
     {
-      eyebrow: "Follow up",
-      title: "Don't ghost the ones that mattered.",
-      body:
-        "Stale applications surface themselves. Set a follow-up date when the moment is fresh; we remind you when it isn't.",
+      eyebrow: t("followUp.eyebrow"),
+      title: t("followUp.title"),
+      body: t("followUp.body"),
       icon: <Bell />,
       accent: "var(--st-tech)",
       mock: <MockStale />,
@@ -862,6 +931,7 @@ function FeatureSlab() {
 }
 
 function MockCapture() {
+  const t = useTranslations("landing.mocks");
   return (
     <div
       style={{
@@ -881,7 +951,7 @@ function MockCapture() {
           marginBottom: 10,
         }}
       >
-        Quick add
+        {t("quickAdd")}
       </div>
       <div
         style={{
@@ -916,19 +986,21 @@ function MockCapture() {
           gap: 8,
         }}
       >
-        <Check size={14} color="var(--p-500)" /> Added Stripe — status: Applied · 18s ago
+        <Check size={14} color="var(--p-500)" /> {t("quickAddSuccess")}
       </div>
     </div>
   );
 }
 
 function MockFunnel() {
+  const tStatus = useTranslations("status");
+  const tMock = useTranslations("landing.mocks");
   const rows = [
-    { label: "Applied", w: 100, n: 24, color: "var(--st-applied)" },
-    { label: "Test", w: 67, n: 16, color: "var(--st-test)" },
-    { label: "HR", w: 50, n: 12, color: "var(--st-hr)" },
-    { label: "Technical", w: 33, n: 8, color: "var(--st-tech)" },
-    { label: "Offer", w: 12, n: 3, color: "var(--st-offer)" },
+    { label: tStatus("applied"), w: 100, n: 24, color: "var(--st-applied)" },
+    { label: tStatus("test_case"), w: 67, n: 16, color: "var(--st-test)" },
+    { label: tStatus("hr_interview"), w: 50, n: 12, color: "var(--st-hr)" },
+    { label: tStatus("technical_interview"), w: 33, n: 8, color: "var(--st-tech)" },
+    { label: tStatus("offer"), w: 12, n: 3, color: "var(--st-offer)" },
   ];
   return (
     <div
@@ -949,7 +1021,7 @@ function MockFunnel() {
           marginBottom: 14,
         }}
       >
-        Funnel
+        {tMock("funnel")}
       </div>
       {rows.map((s, i) => (
         <div
@@ -991,6 +1063,7 @@ function MockFunnel() {
 }
 
 function MockStale() {
+  const t = useTranslations("landing.mocks");
   return (
     <div
       style={{
@@ -1014,9 +1087,9 @@ function MockStale() {
       >
         <Clock size={18} color="var(--st-tech)" />
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Raycast — Mac Engineer</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{t("staleTitle")}</div>
           <div style={{ fontSize: 12, color: "var(--jt-text-2)", marginTop: 2 }}>
-            Applied 3 weeks ago · no movement
+            {t("staleBody")}
           </div>
         </div>
         <span
@@ -1029,7 +1102,7 @@ function MockStale() {
             fontWeight: 600,
           }}
         >
-          Stale
+          {t("staleTag")}
         </span>
       </div>
       <div
@@ -1044,33 +1117,19 @@ function MockStale() {
         }}
       >
         <Bell size={14} color="var(--st-tech)" />
-        We&apos;ll nudge you on Thursday so this doesn&apos;t slip again.
+        {t("staleReminder")}
       </div>
     </div>
   );
 }
 
 function Testimonials() {
-  const t = [
-    {
-      quote:
-        "I went from 'Excel chaos' to 'I know exactly what's pending' in one evening.",
-      name: "Maya P.",
-      role: "Frontend Engineer · bootcamp grad",
-    },
-    {
-      quote:
-        "The funnel view made me realize cold applications were a waste. Pivoted to referrals — got 3 offers.",
-      name: "Diego R.",
-      role: "Backend Engineer",
-    },
-    {
-      quote:
-        "Stale reminders alone saved two interview rounds I would have ghosted.",
-      name: "Jules T.",
-      role: "Product Designer",
-    },
-  ];
+  const tr = useTranslations();
+  const t = tr.raw("loginV2.quotes") as {
+    quote: string;
+    name: string;
+    role: string;
+  }[];
   return (
     <section
       style={{ padding: "40px 20px", maxWidth: 1280, margin: "0 auto" }}
@@ -1128,39 +1187,10 @@ function Testimonials() {
 }
 
 function FAQ() {
+  const t = useTranslations("landing.faq");
   const [open, setOpen] = React.useState<number>(0);
-  const qs = [
-    {
-      q: "Is it actually free?",
-      a:
-        "Yes, forever. No trial, no surprise tier, no upsells. If we ever add paid features they'll be additive — your existing tracking will always work.",
-    },
-    {
-      q: "Where does my data live?",
-      a:
-        "Supabase, hosted in the EU. You can export everything to CSV or JSON anytime, and deleting your account wipes it for real.",
-    },
-    {
-      q: "Can I import from a spreadsheet?",
-      a:
-        "CSV import is here. Notion and Google Sheets paste-in is on the roadmap — you can also forward a job listing email to your inbox once we ship that.",
-    },
-    {
-      q: "Does it work on phones?",
-      a:
-        "Yes — full mobile, installable as a PWA. Native apps are not on the near roadmap; the web app does what you need.",
-    },
-    {
-      q: "Will I get marketing emails?",
-      a:
-        "Zero. The only mail you'll get is follow-up reminders you opted into and the weekly summary you can disable.",
-    },
-    {
-      q: "Can I delete my account?",
-      a:
-        "Anytime, from Settings → Data. Deleting wipes your applications, notes, and settings for real.",
-    },
-  ];
+  const itemKeys = ["free", "data", "import", "mobile", "email", "delete"] as const;
+  const qs = itemKeys.map((k) => ({ q: t(`items.${k}.q`), a: t(`items.${k}.a`) }));
   return (
     <section
       id="faq"
@@ -1176,7 +1206,7 @@ function FAQ() {
           textAlign: "center",
         }}
       >
-        Frequently asked.
+        {t("title")}
       </h2>
       <div
         style={{
@@ -1244,6 +1274,7 @@ function FAQ() {
 }
 
 function FinalCta() {
+  const t = useTranslations("landing.finalCta");
   return (
     <section style={{ padding: "40px 20px" }} className="sm:!py-20">
       <div
@@ -1278,7 +1309,7 @@ function FinalCta() {
           border="1px solid var(--p-100)"
           icon={<Heart size={12} color="var(--p-500)" />}
         >
-          Built by job seekers, for job seekers
+          {t("pill")}
         </JtPill>
         <h2
           style={{
@@ -1289,7 +1320,7 @@ function FinalCta() {
             color: "var(--p-900)",
           }}
         >
-          Ready when you are.
+          {t("title")}
         </h2>
         <p
           style={{
@@ -1299,7 +1330,7 @@ function FinalCta() {
             margin: "0 auto 28px",
           }}
         >
-          Sign up takes 30 seconds. Tracking your first application takes another 20.
+          {t("subtitle")}
         </p>
         <div
           style={{
@@ -1311,7 +1342,7 @@ function FinalCta() {
         >
           <Link href="/login">
             <JtButton size="lg" iconRight={<ArrowRight />}>
-              Create your account
+              {t("ctaPrimary")}
             </JtButton>
           </Link>
           <a
@@ -1320,7 +1351,7 @@ function FinalCta() {
             rel="noopener noreferrer"
           >
             <JtButton variant="ghost" size="lg" icon={<Github />}>
-              Star on GitHub
+              {t("ctaSecondary")}
             </JtButton>
           </a>
         </div>
@@ -1330,23 +1361,24 @@ function FinalCta() {
 }
 
 function LandingFooter() {
+  const t = useTranslations("landing.footer");
   const cols: { title: string; items: { label: string; href: string; external?: boolean }[] }[] = [
     {
-      title: "Product",
+      title: t("colProduct"),
       items: [
-        { label: "Features", href: "#features" },
-        { label: "Compare", href: "#compare" },
-        { label: "FAQ", href: "#faq" },
-        { label: "Sign in", href: "/login" },
+        { label: t("links.features"), href: "#features" },
+        { label: t("links.compare"), href: "#compare" },
+        { label: t("links.faq"), href: "#faq" },
+        { label: t("links.signIn"), href: "/login" },
       ],
     },
     {
-      title: "Company",
+      title: t("colCompany"),
       items: [
-        { label: "Contact", href: "mailto:hello@jobapplytracker.com", external: true },
-        { label: "GitHub", href: "https://github.com/berkinduz/job-apply-tracker", external: true },
-        { label: "Privacy", href: "/privacy" },
-        { label: "Terms", href: "/terms" },
+        { label: t("links.contact"), href: "mailto:hello@jobapplytracker.com", external: true },
+        { label: t("links.github"), href: "https://github.com/berkinduz/job-apply-tracker", external: true },
+        { label: t("links.privacy"), href: "/privacy" },
+        { label: t("links.terms"), href: "/terms" },
       ],
     },
   ];
@@ -1385,7 +1417,7 @@ function LandingFooter() {
               lineHeight: 1.55,
             }}
           >
-            Your job hunt&apos;s command center. Free, forever.
+            {t("tagline")}
           </p>
         </div>
         {cols.map((c) => (
@@ -1443,7 +1475,7 @@ function LandingFooter() {
         }}
         className="sm:!flex-row"
       >
-        <div>© 2026 JobTrack · Built by Berkin Duz</div>
+        <div>{t("copyright")}</div>
         <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
           <a
             href="https://github.com/berkinduz"
@@ -1458,7 +1490,7 @@ function LandingFooter() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            LinkedIn
+            {t("linkedIn")}
           </a>
         </div>
       </div>

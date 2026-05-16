@@ -205,61 +205,187 @@
     "previewDesc": "Tablolar ve dağınık notlar arasında boğulmayı bırakın. Tüm iş başvurularınızı profesyonel bir panoda düzenleyin, takip edin ve yönetin."
   },
   "landing": {
-    "badge": "Başvurular Arasında Kaybolanlar İçin",
-    "title": "Her başvuruyu tüm detaylarıyla takip edin.",
-    "subtitle": "JobTrack, dağınık tabloları temiz bir panel, sürükle-bırak kanban ve CV ekleriyle değiştirir; bir sonraki adımı hep bilirsiniz.",
-    "ctaPrimary": "Hemen başla",
-    "ctaSecondary": "Nasıl çalışır",
-    "highlights": {
-      "pipeline": "8 aşamalı işe alım akışı",
-      "filters": "Gerçek zamanlı filtreler",
-      "theme": "Koyu + açık mod"
+    "nav": {
+      "features": "Özellikler",
+      "compare": "Karşılaştır",
+      "faq": "SSS",
+      "signIn": "Giriş yap",
+      "getStarted": "Ücretsiz başla"
     },
-    "heroAlt": "JobTrack panel ön izlemesi",
+    "hero": {
+      "pill": "Karmaşık iş arama süreci için",
+      "titleLine1": "Bir sonraki işine geç",
+      "titleLine2": "excel tablosu olmadan.",
+      "subtitle": "Her başvuruyu takip et, zamanında geri dön ve gerçekten neyin işe yaradığını gör. Ücretsiz, kalıcı.",
+      "ctaPrimary": "Takip etmeye başla — ücretsiz",
+      "ctaSecondary": "Çalışırken gör",
+      "trustNoCreditCard": "Kart gerekmez",
+      "trustOwnData": "Verin sana ait",
+      "trustEuHosted": "AB sunucularında"
+    },
     "preview": {
+      "pill": "Üç görünüm, tek doğru kaynak",
+      "title": "Süreci takip et. Hunisini gör. Neyin işe yaradığını bul.",
       "tabs": {
-        "kanban": "Kanban",
-        "detail": "Detay"
+        "track": "Takip",
+        "visualize": "Görselleştir",
+        "learn": "Öğren"
       },
-      "alts": {
-        "kanban": "Sürükle-bırak kartlarla kanban görünümü",
-        "detail": "CV ve zaman çizelgesi olan başvuru detay görünümü"
+      "altTrack": "Başvuru liste görünümü",
+      "altVisualize": "Kanban panosu görünümü",
+      "altLearn": "Analitik görünümü"
+    },
+    "compare": {
+      "title": "JobTrack mu, o tablo mu?",
+      "subtitle": "Hani başta umut veren ama sonra kâbusa dönen tablo.",
+      "colNeed": "Şunu yapmam lazım…",
+      "colSpreadsheet": "Tablo",
+      "colJobTrack": "JobTrack",
+      "rows": {
+        "find": { "need": "Mart'ta gönderdiğim başvuruları bul", "ss": "Aşağı kaydır, dua et", "jt": "Anında filtre + arama" },
+        "follow": { "need": "Takip tarihlerini izle", "ss": "Koşullu biçimlendirme cehennemi", "jt": "Otomatik hatırlatma" },
+        "rate": { "need": "Teklif oranımı gör", "ss": "Asla kuramayacağın pivot tablo", "jt": "Hazır geliyor" },
+        "move": { "need": "Bir başvuruyu ilerlet", "ss": "Hücre düzenle", "jt": "Kanban'da sürükle" },
+        "phone": { "need": "Telefonda kullan", "ss": "🙃", "jt": "Tam mobil" }
       }
     },
     "features": {
-      "kanban": {
-        "title": "Kanban netliği",
-        "description": "Kartları aşamalar arasında sürükleyin, ilerlemeyi görünür tutun."
+      "capture": {
+        "eyebrow": "Yakala",
+        "title": "Bir başvuru, 30 saniyede.",
+        "body": "İlan linkini yapıştır, hızlıca not düş veya Şirket → Pozisyon yaz. Gerisini biz dolduruyoruz — detayı sonra ekleyebilirsin."
       },
-      "notes": {
-        "title": "CV ekleri",
-        "description": "Her başvuruya gönderdiğin CV'yi ekle."
+      "see": {
+        "eyebrow": "Gör",
+        "title": "Hunisin sonunda okunur.",
+        "body": "Başvuruların nerede tıkandığını izle. Kaynakları karşılaştır. Tabloların gizlediği örüntüleri yakala."
       },
-      "insights": {
-        "title": "Akıllı içgörüler",
-        "description": "Temiz filtreleme ve sıralama ile süreci yakalayın."
-      },
-      "timeline": {
-        "title": "Zamanında kalın",
-        "description": "Süreci veya mülakat zaman çizelgelerini kaçırmayın."
+      "followUp": {
+        "eyebrow": "Geri dön",
+        "title": "Önemli olanları unutma.",
+        "body": "Bayatlamış başvurular kendini gösterir. Anın taze haliyle takip tarihi belirle; biz sana zamanı geldiğinde hatırlatırız."
       }
     },
-    "sections": {
-      "commandCenter": {
-        "title": "Tüm kontrol tek merkezde",
-        "description": "Durum, kaynak ya da çalışma tipine göre filtreleyin. Önemli başvuruları sabitleyin.",
-        "bullets": "Sabitlenmiş odak|Çok dilli|Responsive|Güvenli tasarım"
-      },
-      "dailyUse": {
-        "title": "Günlük kullanım için hızlı",
-        "description": "Güncellemeye daha az, mülakata daha çok zaman ayırın.",
-        "badges": "Supabase Auth|Gerçek zamanlı filtreler|Kanban modu|CV yükleme"
+    "mocks": {
+      "quickAdd": "Hızlı ekle",
+      "quickAddSuccess": "Stripe eklendi — durum: Başvuruldu · 18s önce",
+      "funnel": "Huni",
+      "staleTitle": "Raycast — Mac Engineer",
+      "staleBody": "3 hafta önce başvuruldu · hareket yok",
+      "staleTag": "Bayat",
+      "staleReminder": "Perşembe hatırlatırız ki bir daha kaçırmayasın."
+    },
+    "faq": {
+      "title": "Sık sorulanlar.",
+      "items": {
+        "free": {
+          "q": "Gerçekten ücretsiz mi?",
+          "a": "Evet, kalıcı olarak. Deneme yok, sürpriz paket yok, satış baskısı yok. İleride ücretli özellik eklersek üzerine eklenir — mevcut takibin hep çalışmaya devam eder."
+        },
+        "data": {
+          "q": "Verim nerede tutuluyor?",
+          "a": "AB sunucularında Supabase'de. Her şeyi istediğin zaman CSV veya JSON olarak dışa aktarabilirsin; hesabını silmek de gerçekten siler."
+        },
+        "import": {
+          "q": "Tablodan içe aktarabilir miyim?",
+          "a": "CSV içe aktarma hazır. Notion ve Google Sheets yapıştırması yol haritasında — ilerde e-posta yönlendirme de gelecek."
+        },
+        "mobile": {
+          "q": "Telefonda çalışıyor mu?",
+          "a": "Evet — tam mobil, PWA olarak kurulabilir. Native uygulama yakın planda yok; web uygulaması işini görüyor."
+        },
+        "email": {
+          "q": "Pazarlama e-postası alır mıyım?",
+          "a": "Sıfır. Sadece izin verdiğin takip hatırlatmaları ve istersen kapatabileceğin haftalık özet gelir."
+        },
+        "delete": {
+          "q": "Hesabımı silebilir miyim?",
+          "a": "Her an, Ayarlar → Veri'den. Silme; başvurularını, notlarını ve ayarlarını gerçekten siler."
+        }
       }
     },
-    "ctaBottom": {
-      "title": "İş aramana düzen katmaya hazır mısın?",
-      "description": "Panelini oluştur ve dakikalar içinde takip etmeye başla.",
-      "button": "Hemen takip etmeye başla"
+    "finalCta": {
+      "pill": "İş arayanlar tarafından, iş arayanlar için",
+      "title": "Sen hazır olduğunda.",
+      "subtitle": "Kayıt 30 saniye sürer. İlk başvurunu takibe almak ise 20 saniye daha.",
+      "ctaPrimary": "Hesabını oluştur",
+      "ctaSecondary": "GitHub'da yıldız ver"
+    },
+    "footer": {
+      "tagline": "İş arama sürecinin komuta merkezi. Ücretsiz, kalıcı.",
+      "colProduct": "Ürün",
+      "colCompany": "Şirket",
+      "links": {
+        "features": "Özellikler",
+        "compare": "Karşılaştır",
+        "faq": "SSS",
+        "signIn": "Giriş yap",
+        "contact": "İletişim",
+        "github": "GitHub",
+        "privacy": "Gizlilik",
+        "terms": "Şartlar"
+      },
+      "copyright": "© 2026 JobTrack · Berkin Duz tarafından",
+      "linkedIn": "LinkedIn"
     }
+  },
+  "loginV2": {
+    "headingSignIn": "Tekrar hoş geldin.",
+    "headingSignUp": "Hadi takibe başlayalım.",
+    "headingMagic": "Şifresiz giriş yap.",
+    "sublineSignIn": "Kaldığın yerden devam et.",
+    "sublineSignUp": "30 saniyelik kayıt. Ücretsiz, kalıcı.",
+    "sublineMagic": "Tek tıkla giriş linki gönderelim.",
+    "fieldEmail": "E-posta",
+    "fieldEmailPlaceholder": "sen@ornek.com",
+    "fieldPassword": "Şifre",
+    "passwordPlaceholder": "••••••••",
+    "forgot": "Unuttun mu?",
+    "buttonSignIn": "E-posta ile giriş yap",
+    "buttonSignUp": "Hesap oluştur",
+    "buttonMagicSend": "Giriş linki gönder",
+    "buttonSigningIn": "Giriş yapılıyor…",
+    "buttonCreating": "Hesap oluşturuluyor…",
+    "buttonSending": "Gönderiliyor…",
+    "magicSwitchToMagic": "Veya sihirli link gönder →",
+    "magicSwitchToPassword": "← Şifreyle giriş yap",
+    "divider": "Veya şununla devam et",
+    "oauthGoogle": "Google",
+    "oauthGithub": "GitHub",
+    "promptNew": "Yeni misin?",
+    "promptExisting": "Zaten hesabın var mı?",
+    "promptSignUp": "Hesap oluştur →",
+    "promptSignIn": "Giriş yap →",
+    "agreePrefix": "Devam ederek",
+    "agreeTerms": "Şartlar",
+    "agreeAnd": "ve",
+    "agreePrivacy": "Gizlilik Politikası",
+    "magicSentTitle": "Gelen kutunu kontrol et.",
+    "magicSentBody": "{email} adresine bir giriş linki gönderdik. 15 dakika içinde geçerli.",
+    "magicSentTip": "İpucu: spam klasörüne de bakmayı unutma.",
+    "magicSentBack": "← Farklı bir e-posta kullan",
+    "errors": {
+      "fillEmailPassword": "E-posta ve şifre gerekli",
+      "passwordMinLength": "Şifre en az 8 karakter olmalı",
+      "fillEmail": "E-posta gerekli",
+      "invalidCredentials": "E-posta veya şifre yanlış. Tekrar dene veya sıfırla.",
+      "notConfirmed": "Önce e-postanı onayla — gelen kutuna bak.",
+      "generic": "Bir şeyler ters gitti"
+    },
+    "signupSuccess": "E-postanı onaylamak için gelen kutunu kontrol et.",
+    "magicSentToast": "Sihirli link gönderildi — gelen kutuna bak.",
+    "passwordStrength": {
+      "tooShort": "Çok kısa",
+      "weak": "Zayıf",
+      "okay": "İdare eder",
+      "strong": "Güçlü",
+      "veryStrong": "Çok güçlü"
+    },
+    "homeLink": "← Anasayfa",
+    "quotes": [
+      { "quote": "Bir akşamda 'Excel kaosu'ndan 'tam olarak ne beklediğimi biliyorum'a geçtim.", "name": "Maya P.", "role": "Frontend Engineer · bootcamp mezunu" },
+      { "quote": "Huni görünümü, soğuk başvuruların boşa olduğunu gösterdi. Referansa döndüm — 3 teklif aldım.", "name": "Diego R.", "role": "Backend Engineer" },
+      { "quote": "Sadece bayatlama hatırlatmaları, kaçıracağım iki mülakat turunu kurtardı.", "name": "Jules T.", "role": "Product Designer" }
+    ]
   }
 }

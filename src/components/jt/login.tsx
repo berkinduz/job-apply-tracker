@@ -5,37 +5,22 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { JtButton, JtLogo, JtPill } from "@/components/jt/primitives";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "signin" | "signup" | "magic";
 
-const QUOTES = [
-  {
-    quote:
-      "I went from 'Excel chaos' to 'I know exactly what's pending' in one evening.",
-    name: "Maya P.",
-    role: "Frontend Engineer · bootcamp grad",
-  },
-  {
-    quote:
-      "The funnel view made me realize cold applications were a waste. Pivoted to referrals — got 3 offers.",
-    name: "Diego R.",
-    role: "Backend Engineer",
-  },
-  {
-    quote:
-      "Stale reminders alone saved two interview rounds I would have ghosted.",
-    name: "Jules T.",
-    role: "Product Designer",
-  },
-];
+type Quote = { quote: string; name: string; role: string };
 
 export function JtLogin() {
   const router = useRouter();
   const search = useSearchParams();
   const initialMode: Mode = search?.get("mode") === "signup" ? "signup" : "signin";
+  const t = useTranslations("loginV2");
+  const tRoot = useTranslations();
+  const QUOTES = tRoot.raw("loginV2.quotes") as Quote[];
 
   const [mode, setMode] = React.useState<Mode>(initialMode);
   const [email, setEmail] = React.useState("");
@@ -49,7 +34,7 @@ export function JtLogin() {
       setQuoteIdx((i) => (i + 1) % QUOTES.length);
     }, 6000);
     return () => clearInterval(id);
-  }, []);
+  }, [QUOTES.length]);
 
   const supabase = React.useMemo(() => createClient(), []);
   const next = search?.get("next") || "/applications";
@@ -57,11 +42,11 @@ export function JtLogin() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Email and password are required");
+      toast.error(t("errors.fillEmailPassword"));
       return;
     }
     if (mode === "signup" && password.length < 8) {
-      toast.error("Password should be at least 8 characters");
+      toast.error(t("errors.passwordMinLength"));
       return;
     }
     setBusy(true);
@@ -75,7 +60,7 @@ export function JtLogin() {
           },
         });
         if (error) throw error;
-        toast.success("Check your inbox to confirm your email.");
+        toast.success(t("signupSuccess"));
         setBusy(false);
         return;
       }
@@ -87,11 +72,11 @@ export function JtLogin() {
       router.push(next);
       router.refresh();
     } catch (err) {
-      const msg = (err as Error).message || "Something went wrong";
+      const msg = (err as Error).message || t("errors.generic");
       if (/Invalid login/i.test(msg)) {
-        toast.error("Email or password isn't right. Try again or reset.");
+        toast.error(t("errors.invalidCredentials"));
       } else if (/not confirmed/i.test(msg)) {
-        toast.error("Confirm your email first — check your inbox.");
+        toast.error(t("errors.notConfirmed"));
       } else {
         toast.error(msg);
       }
@@ -102,7 +87,7 @@ export function JtLogin() {
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast.error("Email is required");
+      toast.error(t("errors.fillEmail"));
       return;
     }
     setBusy(true);
@@ -117,7 +102,7 @@ export function JtLogin() {
       });
       if (error) throw error;
       setMagicSent(email);
-      toast.success("Magic link sent — check your inbox.");
+      toast.success(t("magicSentToast"));
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -141,16 +126,16 @@ export function JtLogin() {
 
   const heading =
     mode === "signin"
-      ? "Welcome back."
+      ? t("headingSignIn")
       : mode === "signup"
-        ? "Let's get you tracking."
-        : "Sign in without a password.";
+        ? t("headingSignUp")
+        : t("headingMagic");
   const subline =
     mode === "signin"
-      ? "Pick up where you left off."
+      ? t("sublineSignIn")
       : mode === "signup"
-        ? "30-second signup. Free, forever."
-        : "We'll email you a one-tap sign-in link.";
+        ? t("sublineSignUp")
+        : t("sublineMagic");
 
   return (
     <div
@@ -176,7 +161,7 @@ export function JtLogin() {
           href="/"
           style={{ fontSize: 13, color: "var(--jt-text-3)" }}
         >
-          ← Home
+          {t("homeLink")}
         </Link>
       </header>
 
@@ -276,11 +261,11 @@ export function JtLogin() {
                     <JtButton type="submit" size="lg" full disabled={busy}>
                       {busy ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" /> Sending…
+                          <Loader2 size={16} className="animate-spin" /> {t("buttonSending")}
                         </>
                       ) : (
                         <>
-                          <Mail size={16} /> Email me a sign-in link
+                          <Mail size={16} /> {t("buttonMagicSend")}
                         </>
                       )}
                     </JtButton>
@@ -295,7 +280,7 @@ export function JtLogin() {
                         cursor: "pointer",
                       }}
                     >
-                      ← Use a password instead
+                      {t("magicSwitchToPassword")}
                     </button>
                   </form>
                 ) : (
@@ -315,7 +300,7 @@ export function JtLogin() {
                               color: "var(--jt-text-2)",
                             }}
                           >
-                            Forgot?
+                            {t("forgot")}
                           </Link>
                         ) : undefined
                       }
@@ -324,12 +309,12 @@ export function JtLogin() {
                       {busy ? (
                         <>
                           <Loader2 size={16} className="animate-spin" />
-                          {mode === "signup" ? "Creating account…" : "Signing in…"}
+                          {mode === "signup" ? t("buttonCreating") : t("buttonSigningIn")}
                         </>
                       ) : (
                         <>
                           <Mail size={16} />
-                          {mode === "signup" ? "Create account" : "Sign in with email"}
+                          {mode === "signup" ? t("buttonSignUp") : t("buttonSignIn")}
                         </>
                       )}
                     </JtButton>
@@ -345,12 +330,12 @@ export function JtLogin() {
                         fontWeight: 500,
                       }}
                     >
-                      Or email me a magic link instead →
+                      {t("magicSwitchToMagic")}
                     </button>
                   </form>
                 )}
 
-                <Divider label="Or continue with" />
+                <Divider label={t("divider")} />
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   <JtButton
@@ -358,14 +343,14 @@ export function JtLogin() {
                     onClick={() => oauth("google")}
                     disabled={busy}
                   >
-                    <GoogleIcon /> Google
+                    <GoogleIcon /> {t("oauthGoogle")}
                   </JtButton>
                   <JtButton
                     variant="secondary"
                     onClick={() => oauth("github")}
                     disabled={busy}
                   >
-                    <GithubIcon /> GitHub
+                    <GithubIcon /> {t("oauthGithub")}
                   </JtButton>
                 </div>
 
@@ -379,7 +364,7 @@ export function JtLogin() {
                 >
                   {mode === "signin" ? (
                     <>
-                      New here?{" "}
+                      {t("promptNew")}{" "}
                       <button
                         type="button"
                         onClick={() => setMode("signup")}
@@ -391,12 +376,12 @@ export function JtLogin() {
                           cursor: "pointer",
                         }}
                       >
-                        Create an account →
+                        {t("promptSignUp")}
                       </button>
                     </>
                   ) : (
                     <>
-                      Already have an account?{" "}
+                      {t("promptExisting")}{" "}
                       <button
                         type="button"
                         onClick={() => setMode("signin")}
@@ -408,7 +393,7 @@ export function JtLogin() {
                           cursor: "pointer",
                         }}
                       >
-                        Sign in →
+                        {t("promptSignIn")}
                       </button>
                     </>
                   )}
@@ -425,13 +410,13 @@ export function JtLogin() {
                 lineHeight: 1.5,
               }}
             >
-              By continuing you agree to our{" "}
+              {t("agreePrefix")}{" "}
               <Link href="/terms" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
-                Terms
+                {t("agreeTerms")}
               </Link>{" "}
-              and{" "}
+              {t("agreeAnd")}{" "}
               <Link href="/privacy" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
-                Privacy Policy
+                {t("agreePrivacy")}
               </Link>
               .
             </p>
@@ -453,16 +438,17 @@ function FieldEmail({
   onChange: (v: string) => void;
   disabled?: boolean;
 }) {
+  const t = useTranslations("loginV2");
   const [focused, setFocused] = React.useState(false);
   return (
     <div>
-      <label style={fieldLabel}>Email</label>
+      <label style={fieldLabel}>{t("fieldEmail")}</label>
       <div style={fieldWrap(focused)}>
         <input
           type="email"
           autoComplete="email"
           inputMode="email"
-          placeholder="you@example.com"
+          placeholder={t("fieldEmailPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
@@ -489,19 +475,20 @@ function FieldPassword({
   showStrength?: boolean;
   hint?: React.ReactNode;
 }) {
+  const t = useTranslations("loginV2");
   const [focused, setFocused] = React.useState(false);
-  const strength = passwordStrength(value);
+  const strength = passwordStrength(value, (k) => t(`passwordStrength.${k}`));
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <label style={fieldLabel}>Password</label>
+        <label style={fieldLabel}>{t("fieldPassword")}</label>
         {hint && <span>{hint}</span>}
       </div>
       <div style={fieldWrap(focused)}>
         <input
           type="password"
           autoComplete={showStrength ? "new-password" : "current-password"}
-          placeholder="••••••••"
+          placeholder={t("passwordPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
@@ -581,7 +568,10 @@ const fieldInput: React.CSSProperties = {
   letterSpacing: "-0.005em",
 };
 
-function passwordStrength(pw: string): { score: 0 | 1 | 2 | 3 | 4; label: string; color: string } {
+function passwordStrength(
+  pw: string,
+  tr: (key: "tooShort" | "weak" | "okay" | "strong" | "veryStrong") => string,
+): { score: 0 | 1 | 2 | 3 | 4; label: string; color: string } {
   if (!pw) return { score: 0, label: "—", color: "var(--jt-text-3)" };
   let score = 0;
   if (pw.length >= 8) score++;
@@ -590,11 +580,11 @@ function passwordStrength(pw: string): { score: 0 | 1 | 2 | 3 | 4; label: string
   if (/[^a-zA-Z0-9]/.test(pw)) score++;
   if (pw.length >= 14) score = Math.min(4, score + 1);
   const map: Record<number, { label: string; color: string }> = {
-    0: { label: "Too short", color: "var(--st-rejected)" },
-    1: { label: "Weak", color: "var(--st-rejected)" },
-    2: { label: "Okay", color: "var(--a-600)" },
-    3: { label: "Strong", color: "var(--st-accepted)" },
-    4: { label: "Very strong", color: "var(--st-accepted)" },
+    0: { label: tr("tooShort"), color: "var(--st-rejected)" },
+    1: { label: tr("weak"), color: "var(--st-rejected)" },
+    2: { label: tr("okay"), color: "var(--a-600)" },
+    3: { label: tr("strong"), color: "var(--st-accepted)" },
+    4: { label: tr("veryStrong"), color: "var(--st-accepted)" },
   };
   return { score: score as 0 | 1 | 2 | 3 | 4, ...map[score] };
 }
@@ -628,6 +618,8 @@ function Divider({ label }: { label: string }) {
 }
 
 function MagicLinkSent({ email, onBack }: { email: string; onBack: () => void }) {
+  const t = useTranslations("loginV2");
+  const bodyParts = t("magicSentBody").split("{email}");
   return (
     <div style={{ textAlign: "center", padding: "20px 0" }}>
       <div
@@ -647,14 +639,15 @@ function MagicLinkSent({ email, onBack }: { email: string; onBack: () => void })
         <Mail size={28} color="var(--p-500)" />
       </div>
       <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 8px" }}>
-        Check your inbox.
+        {t("magicSentTitle")}
       </h2>
       <p style={{ fontSize: 14, color: "var(--jt-text-2)", margin: "0 0 18px" }}>
-        We sent a sign-in link to <strong style={{ color: "var(--jt-text)" }}>{email}</strong>.
-        It expires in 15 minutes.
+        {bodyParts[0]}
+        <strong style={{ color: "var(--jt-text)" }}>{email}</strong>
+        {bodyParts[1]}
       </p>
       <JtPill bg="var(--jt-bg-sunk)" color="var(--jt-text-2)" size="sm">
-        Tip: don&apos;t forget to check spam.
+        {t("magicSentTip")}
       </JtPill>
       <div style={{ marginTop: 22 }}>
         <button
@@ -669,7 +662,7 @@ function MagicLinkSent({ email, onBack }: { email: string; onBack: () => void })
             cursor: "pointer",
           }}
         >
-          ← Use a different email
+          {t("magicSentBack")}
         </button>
       </div>
     </div>
