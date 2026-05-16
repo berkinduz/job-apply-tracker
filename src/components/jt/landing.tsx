@@ -303,7 +303,7 @@ function Hero() {
           gap: 32,
           alignItems: "center",
         }}
-        className="lg:!grid-cols-[1.05fr_1fr] lg:!gap-14"
+        className="lg:!grid-cols-[1fr_1.25fr] lg:!gap-12"
       >
         <div>
           <JtPill
@@ -404,22 +404,20 @@ function HeroMockup() {
     { st: "offer", cards: [{ c: "Anthropic", r: "Research Eng" }], glow: true },
   ];
   return (
-    <div style={{ position: "relative", height: 460, minHeight: 320 }}>
+    <div style={{ position: "relative", height: 520, minHeight: 360 }}>
       <div
         style={{
           position: "absolute",
-          inset: 0,
+          inset: -20,
           background:
-            "radial-gradient(circle at 70% 30%, color-mix(in oklab, var(--p-100), transparent 30%), transparent 60%)",
+            "radial-gradient(circle at 70% 30%, color-mix(in oklab, var(--p-100), transparent 30%), transparent 65%)",
           pointerEvents: "none",
         }}
       />
       <div
         style={{
           position: "absolute",
-          top: 20,
-          right: 0,
-          left: 20,
+          inset: 0,
           background: "var(--jt-bg-elev)",
           border: "1px solid var(--jt-border)",
           borderRadius: "var(--r-xl)",
