@@ -229,26 +229,43 @@ export function useApplicationActivity(app: JobApplication | undefined): {
   const [records, setRecords] = React.useState<ActivityEventRecord[] | null>(null);
   const [loading, setLoading] = React.useState(false);
   const appId = app?.id;
+  // `updatedAt` advances on every server mutation. Refetching when it
+  // changes keeps the timeline current after status changes, notes,
+  // pins, follow-up edits — without forcing the user to refresh.
+  const stamp = app?.updatedAt;
 
   React.useEffect(() => {
     if (!appId) return;
     let cancelled = false;
-    setLoading(true);
-    activityService
-      .listForApplication(appId, 100)
-      .then((r) => {
-        if (!cancelled) setRecords(r);
-      })
-      .catch(() => {
-        if (!cancelled) setRecords([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+
+    const run = () => {
+      setLoading(true);
+      activityService
+        .listForApplication(appId, 100)
+        .then((r) => {
+          if (!cancelled) setRecords(r);
+        })
+        .catch(() => {
+          if (!cancelled) setRecords([]);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
+    // Store mutations log activity events fire-and-forget. The INSERT can
+    // land a beat after the mutation resolves, so we wait 350ms before
+    // refetching to avoid showing a stale list on the first poll.
+    const delay = records === null ? 0 : 350;
+    const id = setTimeout(run, delay);
+
     return () => {
       cancelled = true;
+      clearTimeout(id);
     };
-  }, [appId]);
+    // records intentionally omitted — we only want this to re-run on id or stamp change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId, stamp]);
 
   const events = React.useMemo<ActivityEvent[]>(() => {
     if (!app) return [];
