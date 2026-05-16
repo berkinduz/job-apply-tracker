@@ -638,17 +638,17 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
   const sources: Record<typeof tab, { type: "image" | "video"; src: string; alt: string }> = {
     track: {
       type: "image",
-      src: `/dashboard-preview_${variant}.png`,
+      src: `/track_${variant}.png`,
       alt: t("altTrack"),
     },
     visual: {
-      type: "video",
-      src: `/kanban_${variant}.webm`,
+      type: "image",
+      src: `/visualize_${variant}.png`,
       alt: t("altVisualize"),
     },
     learn: {
       type: "image",
-      src: `/analytics_${variant}.png`,
+      src: `/learn_${variant}.png`,
       alt: t("altLearn"),
     },
   };
