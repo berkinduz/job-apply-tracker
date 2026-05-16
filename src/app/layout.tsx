@@ -28,12 +28,7 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   keywords: siteConfig.keywords,
   applicationName: siteConfig.name,
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     url: siteConfig.url,

@@ -426,11 +426,11 @@ export function JtLogin() {
               }}
             >
               By continuing you agree to our{" "}
-              <Link href="#" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
+              <Link href="/terms" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
                 Terms
               </Link>{" "}
               and{" "}
-              <Link href="#" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
+              <Link href="/privacy" style={{ color: "var(--jt-text-2)", textDecoration: "underline" }}>
                 Privacy Policy
               </Link>
               .

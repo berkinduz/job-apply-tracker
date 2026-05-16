@@ -1330,13 +1330,25 @@ function FinalCta() {
 }
 
 function LandingFooter() {
-  const cols: { title: string; items: string[] }[] = [
-    { title: "Product", items: ["Features", "Pricing (free)", "Roadmap", "Changelog"] },
+  const cols: { title: string; items: { label: string; href: string; external?: boolean }[] }[] = [
     {
-      title: "Resources",
-      items: ["Templates", "Compare vs. Teal", "Compare vs. Notion", "Blog"],
+      title: "Product",
+      items: [
+        { label: "Features", href: "#features" },
+        { label: "Compare", href: "#compare" },
+        { label: "FAQ", href: "#faq" },
+        { label: "Sign in", href: "/login" },
+      ],
     },
-    { title: "Company", items: ["About", "Contact", "Privacy", "Terms"] },
+    {
+      title: "Company",
+      items: [
+        { label: "Contact", href: "mailto:hello@jobapplytracker.com", external: true },
+        { label: "GitHub", href: "https://github.com/berkinduz/job-apply-tracker", external: true },
+        { label: "Privacy", href: "/privacy" },
+        { label: "Terms", href: "/terms" },
+      ],
+    },
   ];
   return (
     <footer
@@ -1355,7 +1367,7 @@ function LandingFooter() {
           gridTemplateColumns: "1fr",
           gap: 32,
         }}
-        className="md:!grid-cols-[1.4fr_1fr_1fr_1fr] md:!gap-10"
+        className="md:!grid-cols-[1.6fr_1fr_1fr] md:!gap-10"
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1391,15 +1403,27 @@ function LandingFooter() {
               {c.title}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {c.items.map((i) => (
-                <a
-                  key={i}
-                  href="#"
-                  style={{ fontSize: 14, color: "var(--jt-text-2)" }}
-                >
-                  {i}
-                </a>
-              ))}
+              {c.items.map((i) =>
+                i.external || i.href.startsWith("mailto:") ? (
+                  <a
+                    key={i.label}
+                    href={i.href}
+                    target={i.href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel={i.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                    style={{ fontSize: 14, color: "var(--jt-text-2)" }}
+                  >
+                    {i.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={i.label}
+                    href={i.href}
+                    style={{ fontSize: 14, color: "var(--jt-text-2)" }}
+                  >
+                    {i.label}
+                  </Link>
+                ),
+              )}
             </div>
           </div>
         ))}
