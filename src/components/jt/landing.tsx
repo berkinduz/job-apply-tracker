@@ -49,6 +49,7 @@ export function JtLanding() {
       <LandingHeader />
       <Hero />
       <Preview />
+      <DeepDive />
       <Compare />
       <FeatureSlab />
       <Testimonials />
@@ -693,6 +694,137 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
         />
       )}
     </div>
+  );
+}
+
+function DeepDive() {
+  const t = useTranslations("landing.deepDive");
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const src = mounted && resolvedTheme === "dark"
+    ? "/app_detail_dark.png"
+    : "/app_detail_light.png";
+
+  const checks = [
+    t("checks.0"),
+    t("checks.1"),
+    t("checks.2"),
+    t("checks.3"),
+  ];
+
+  return (
+    <section
+      style={{
+        padding: "40px 20px",
+        maxWidth: 1280,
+        margin: "0 auto",
+      }}
+      className="sm:!py-16"
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: 28,
+          alignItems: "center",
+        }}
+        className="lg:!grid-cols-[0.9fr_1.3fr] lg:!gap-14"
+      >
+        <div>
+          <JtPill
+            bg="var(--jt-bg-sunk)"
+            color="var(--p-700)"
+            icon={<Sparkles size={12} />}
+          >
+            {t("pill")}
+          </JtPill>
+          <h2
+            style={{
+              fontSize: "clamp(26px, 4vw, 36px)",
+              fontWeight: 700,
+              letterSpacing: "-0.03em",
+              margin: "16px 0 12px",
+              textWrap: "balance",
+            }}
+          >
+            {t("title")}
+          </h2>
+          <p
+            style={{
+              fontSize: 16,
+              color: "var(--jt-text-2)",
+              lineHeight: 1.6,
+              margin: "0 0 18px",
+              maxWidth: 460,
+            }}
+          >
+            {t("body")}
+          </p>
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            {checks.map((c) => (
+              <li
+                key={c}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                  fontSize: 14,
+                  color: "var(--jt-text)",
+                  lineHeight: 1.5,
+                }}
+              >
+                <span
+                  style={{
+                    flex: "0 0 16px",
+                    height: 16,
+                    borderRadius: 999,
+                    background: "var(--p-100)",
+                    color: "var(--p-700)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 2,
+                  }}
+                >
+                  <Check size={10} strokeWidth={3} />
+                </span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "var(--r-xl)",
+            overflow: "hidden",
+            border: "1px solid var(--jt-border)",
+            boxShadow: "var(--sh-lg)",
+            aspectRatio: "16 / 9",
+            background: "var(--jt-bg-elev)",
+          }}
+        >
+          <Image
+            key={src}
+            src={src}
+            alt={t("alt")}
+            fill
+            sizes="(max-width: 1280px) 100vw, 760px"
+            style={{ objectFit: "cover", objectPosition: "top" }}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 

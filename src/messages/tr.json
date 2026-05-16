@@ -235,6 +235,18 @@
       "altVisualize": "Kanban panosu görünümü",
       "altLearn": "Analitik görünümü"
     },
+    "deepDive": {
+      "pill": "Derine in",
+      "title": "Bir başvuru hareketlendiğinde, önemli her şey tek ekranda.",
+      "body": "Statü değişiklikleri, takip hatırlatmaları, notlar, kişiler — hepsi tek sakin görünümde. Sekme yok, kazma yok.",
+      "alt": "Pipeline, aktivite çizelgesi, takip kartı ve detay sidebar'ı olan başvuru detay görünümü",
+      "checks": [
+        "Pipeline ilerlemesi tek bakışta — 7 aşama, tıkla ilerlet",
+        "Gerçek aktivite çizelgesi — her statü değişikliği, not, CV güncellemesi",
+        "Takip hatırlatmaları + tek tıkla snooze (+1g / +3g / +1h)",
+        "Klavye kısayolları — eli klavyeden kaldırma"
+      ]
+    },
     "compare": {
       "title": "JobTrack mu, o tablo mu?",
       "subtitle": "Hani başta umut veren ama sonra kâbusa dönen tablo.",

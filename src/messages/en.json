@@ -235,6 +235,18 @@
       "altVisualize": "Kanban board view",
       "altLearn": "Analytics view"
     },
+    "deepDive": {
+      "pill": "Go deep",
+      "title": "When something starts moving, see everything that matters.",
+      "body": "Every status change, follow-up reminder, note, and contact — surfaced in one calm view. No tabs, no digging.",
+      "alt": "Application detail view with pipeline, activity timeline, follow-up card, and details sidebar",
+      "checks": [
+        "Pipeline progress at a glance — 7 stages, click to advance",
+        "Real activity timeline — every status change, note, and resume update",
+        "Follow-up reminders with one-tap snooze (+1d / +3d / +1w)",
+        "Keyboard shortcuts so power users stay on the keyboard"
+      ]
+    },
     "compare": {
       "title": "JobTrack vs. that spreadsheet",
       "subtitle": "You know the one. It started so well.",
