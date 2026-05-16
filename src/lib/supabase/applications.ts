@@ -199,6 +199,21 @@ export const applicationService = {
     if (error) throw error;
   },
 
+  async createMany(
+    items: ApplicationFormData[],
+    userId: string,
+  ): Promise<{ inserted: number; ids: string[] }> {
+    if (items.length === 0) return { inserted: 0, ids: [] };
+    const payload = items.map((item) => applicationToDb(item, userId));
+    const { data, error } = await supabase
+      .from("applications")
+      .insert(payload as never)
+      .select("id");
+    if (error) throw error;
+    const ids = (data as { id: string }[] | null)?.map((r) => r.id) || [];
+    return { inserted: ids.length, ids };
+  },
+
   async completeFollowUp(id: string): Promise<void> {
     const { error } = await supabase
       .from("applications")

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import { JtButton, JtLogo, JtPill } from "@/components/jt/primitives";
 import { seedSampleApplications, saveWeeklyGoal } from "@/app/onboarding/actions";
+import { CsvImportDialog } from "@/components/jt/csv-import-dialog";
 
 type StartPath = "add" | "sample" | "import" | null;
 
@@ -24,6 +25,7 @@ export function JtOnboarding() {
   const [start, setStart] = React.useState<StartPath>(null);
   const [goal, setGoal] = React.useState(5);
   const [busy, setBusy] = React.useState(false);
+  const [importOpen, setImportOpen] = React.useState(false);
 
   const finish = async () => {
     setBusy(true);
@@ -36,6 +38,13 @@ export function JtOnboarding() {
         } else {
           toast.success(`Seeded ${res.count} sample applications`);
         }
+      }
+      if (start === "import") {
+        // Open the import dialog in-place; once they're done, the dialog
+        // closing sends them to /applications.
+        setImportOpen(true);
+        setBusy(false);
+        return;
       }
       if (start === "add") {
         router.push("/applications/new");
@@ -124,6 +133,15 @@ export function JtOnboarding() {
           )}
         </div>
       </main>
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={(next) => {
+          setImportOpen(next);
+          // When the user closes the dialog (cancel or done), move them into
+          // the app — they've completed onboarding either way.
+          if (!next) router.push("/applications");
+        }}
+      />
     </div>
   );
 }
@@ -168,7 +186,7 @@ function Step1({ onPick }: { onPick: (v: StartPath) => void }) {
       icon: <LinkIcon size={22} color="var(--st-tech)" />,
       title: "Import from a CSV",
       desc: "Bring over your Notion table or spreadsheet.",
-      tag: "Coming: Notion + email",
+      tag: "CSV ready",
     },
   ];
 

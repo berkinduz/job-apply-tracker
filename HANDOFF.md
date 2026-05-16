@@ -194,7 +194,13 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
    (`vercel.json`, daily 08:00 UTC) → `/api/cron/follow-ups`: service-role
    tabanlı, opt-out kontrol eden, Resend ile email gönderen, `follow_up_sent_at`
    damgalayan idempotent worker. Settings'te user-level opt-out toggle.
-6. **CSV import** — onboarding 1. adımdaki "Import from CSV" karşılığı.
+6. ~~**CSV import**~~ DONE. papaparse tabanlı, header auto-detection (EN+TR
+   synonym tablosu), status/work-type/date alias mapping (örn "phone screen" →
+   `hr_interview`, "DD/MM/YYYY" → ISO). Dialog: file pick → preview (geçerli/
+   hatalı satır sayısı + override edilebilir column mapping + skipped rows
+   detayı) → confirm → bulk insert. Settings'te "Import from CSV" butonu;
+   onboarding'de "Import from a CSV" seçeneği "CSV ready" tag'iyle aktif.
+   Sample CSV download da dahil.
 7. **Public profile / share** — viral loop. `jobtrack.com/u/berkin` → kullanıcının funnel istatistikleri (sayılar değil yüzdeler).
 8. ~~**Klavye kısayolları (Cmd+K palette)**~~ — DONE. cmdk dialog ile gerçek
    command palette: quick actions + tüm başvurularda full-text search.

@@ -37,6 +37,7 @@ interface ApplicationState {
   ) => Promise<void>;
   deleteApplication: (id: string) => Promise<void>;
   togglePin: (id: string) => Promise<void>;
+  importApplications: (items: ApplicationFormData[]) => Promise<number>;
   setFollowUp: (id: string, date: string | null) => Promise<void>;
   completeFollowUp: (id: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
@@ -210,6 +211,16 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
         error: (error as Error).message,
       }));
     }
+  },
+
+  importApplications: async (items) => {
+    const supabaseClient = createClient();
+    const { data: u } = await supabaseClient.auth.getUser();
+    if (!u.user) throw new Error("Not authenticated");
+    const { inserted } = await applicationService.createMany(items, u.user.id);
+    // Refresh to pull canonical rows (id, created_at, ...) back into the store.
+    await get().fetchApplications();
+    return inserted;
   },
 
   setFollowUp: async (id, date) => {

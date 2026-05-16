@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 import { JtButton, JtPill } from "@/components/jt/primitives";
 import { createClient } from "@/lib/supabase/client";
+import { CsvImportDialog } from "@/components/jt/csv-import-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +49,7 @@ export function JtSettings({ userEmail }: { userEmail?: string | null }) {
   const [newSource, setNewSource] = React.useState("");
   const [newIndustry, setNewIndustry] = React.useState("");
   const [showClear, setShowClear] = React.useState(false);
+  const [showImport, setShowImport] = React.useState(false);
 
   const handleLanguageChange = (locale: "en" | "tr") => {
     updateSettings({ language: locale });
@@ -187,9 +189,14 @@ export function JtSettings({ userEmail }: { userEmail?: string | null }) {
           <JtButton variant="secondary" icon={<Download size={14} />} onClick={handleExport}>
             Export to JSON
           </JtButton>
-          <JtButton variant="secondary" icon={<Upload size={14} />} disabled>
-            Import from CSV (coming)
+          <JtButton
+            variant="secondary"
+            icon={<Upload size={14} />}
+            onClick={() => setShowImport(true)}
+          >
+            Import from CSV
           </JtButton>
+          <CsvImportDialog open={showImport} onOpenChange={setShowImport} />
         </div>
         <div
           style={{
