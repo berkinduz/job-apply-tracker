@@ -102,6 +102,31 @@ export interface SortOptions {
 }
 
 // Settings
+/**
+ * Activity event kinds + their payload shapes. Add new kinds here when you
+ * want them rendered on the timeline; the renderer falls back to a generic
+ * `"X happened"` line for unknown kinds.
+ */
+export type ActivityKind =
+  | "application_created"
+  | "status_changed"
+  | "note_added"
+  | "follow_up_set"
+  | "follow_up_cleared"
+  | "follow_up_completed"
+  | "pinned"
+  | "unpinned"
+  | "resume_uploaded"
+  | "contact_added";
+
+export interface ActivityEventRecord {
+  id: string;
+  applicationId: string;
+  kind: ActivityKind | string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+}
+
 export interface AppSettings {
   theme: "light" | "dark" | "system";
   language: "en" | "tr";

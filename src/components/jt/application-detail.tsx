@@ -35,7 +35,7 @@ import {
   JtPipeline,
   JtActivityTimeline,
   JtDetailSidebar,
-  buildSyntheticActivity,
+  useApplicationActivity,
 } from "@/components/jt/application-detail-extras";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -87,6 +87,9 @@ export function JtApplicationDetail() {
       setApp(getApplicationById(params.id));
     }
   }, [params?.id, getApplicationById, _hasHydrated]);
+
+  // Must live above the loading-state early-return to keep hook order stable.
+  const { events: activity } = useApplicationActivity(app);
 
   if (!_hasHydrated || isLoading) {
     return <LoadingDetail />;
@@ -160,8 +163,6 @@ export function JtApplicationDetail() {
     setNoteDraft("");
     toast.success("Note added");
   };
-
-  const activity = buildSyntheticActivity(app);
 
   return (
     <>

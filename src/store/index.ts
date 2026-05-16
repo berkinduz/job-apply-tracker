@@ -7,6 +7,7 @@ import {
   AppSettings,
 } from "@/types";
 import { applicationService } from "@/lib/supabase/applications";
+import { activityService } from "@/lib/supabase/activity";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_SOURCES, DEFAULT_INDUSTRIES } from "@/config/constants";
 
@@ -90,6 +91,16 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
         applications: [newApp, ...state.applications],
         isLoading: false,
       }));
+      void activityService.log(newApp.id, "application_created", {
+        company: newApp.companyName,
+        position: newApp.position,
+        status: newApp.status,
+      });
+      if (newApp.followUpDate) {
+        void activityService.log(newApp.id, "follow_up_set", {
+          date: newApp.followUpDate,
+        });
+      }
       return newApp.id;
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
@@ -100,6 +111,7 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
   updateApplication: async (id, data) => {
     set({ isLoading: true, error: null });
     try {
+      const previous = get().applications.find((a) => a.id === id);
       const updated = await applicationService.update(id, data);
       set((state) => ({
         applications: state.applications.map((app) =>
@@ -107,6 +119,26 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
         ),
         isLoading: false,
       }));
+      // Surface status / notes / resume / follow-up edits on the timeline.
+      if (previous && data.status && previous.status !== data.status) {
+        void activityService.log(id, "status_changed", {
+          from: previous.status,
+          to: data.status,
+        });
+      }
+      if (data.notes !== undefined && data.notes && data.notes !== previous?.notes) {
+        void activityService.log(id, "note_added", { note: data.notes });
+      }
+      if (data.resumePath && data.resumePath !== previous?.resumePath) {
+        void activityService.log(id, "resume_uploaded", { path: data.resumePath });
+      }
+      if (data.followUpDate !== undefined) {
+        if (data.followUpDate) {
+          void activityService.log(id, "follow_up_set", { date: data.followUpDate });
+        } else if (previous?.followUpDate) {
+          void activityService.log(id, "follow_up_cleared", {});
+        }
+      }
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
@@ -131,6 +163,10 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
           app.id === id ? updated : app
         ),
       }));
+      void activityService.log(id, "status_changed", {
+        from: previous.status,
+        to: status,
+      });
     } catch (error) {
       set((state) => ({
         applications: state.applications.map((app) =>
@@ -160,6 +196,9 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
           app.id === id ? updated : app
         ),
       }));
+      if (nextNotes && nextNotes !== (previous.notes || "").trim()) {
+        void activityService.log(id, "note_added", { note: nextNotes });
+      }
     } catch (error) {
       set((state) => ({
         applications: state.applications.map((app) =>
@@ -202,6 +241,7 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
 
     try {
       await applicationService.togglePin(id, app.isPinned);
+      void activityService.log(id, app.isPinned ? "unpinned" : "pinned", {});
     } catch (error) {
       // Revert on error
       set((state) => ({
@@ -217,7 +257,22 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
     const supabaseClient = createClient();
     const { data: u } = await supabaseClient.auth.getUser();
     if (!u.user) throw new Error("Not authenticated");
-    const { inserted } = await applicationService.createMany(items, u.user.id);
+    const { inserted, ids } = await applicationService.createMany(
+      items,
+      u.user.id,
+    );
+    // Log a single "created" event per inserted row so the timeline reflects
+    // CSV-imported applications too. Best-effort; failures are swallowed.
+    void Promise.all(
+      ids.map((id, i) =>
+        activityService.log(id, "application_created", {
+          company: items[i].companyName,
+          position: items[i].position,
+          status: items[i].status,
+          via: "csv_import",
+        }),
+      ),
+    );
     // Refresh to pull canonical rows (id, created_at, ...) back into the store.
     await get().fetchApplications();
     return inserted;
@@ -244,8 +299,10 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
     try {
       if (date) {
         await applicationService.setFollowUp(id, date);
+        void activityService.log(id, "follow_up_set", { date });
       } else {
         await applicationService.clearFollowUp(id);
+        void activityService.log(id, "follow_up_cleared", {});
       }
     } catch (error) {
       set((state) => ({
@@ -271,6 +328,9 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
 
     try {
       await applicationService.completeFollowUp(id);
+      void activityService.log(id, "follow_up_completed", {
+        date: previous.followUpDate,
+      });
     } catch (error) {
       set((state) => ({
         applications: state.applications.map((a) =>

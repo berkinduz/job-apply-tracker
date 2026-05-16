@@ -169,7 +169,13 @@ REVOKE INSERT, UPDATE, DELETE ON skill_suggestions FROM anon, authenticated;
 - `applications.offer_details` (jsonb) — base salary, equity, sign-on, deadline
 - `applications.archived_at` (timestamptz, nullable) — soft delete
 - `user_settings.weekly_goal` (int, nullable) — onboarding goal kullanıcıdan alındı ama henüz saklanmıyor
-- Yeni tablo `activity_events` (id, application_id, user_id, kind, payload, created_at) — şu an synthetic timeline kullanıyoruz
+- ~~`activity_events`~~ DONE. Tablo + RLS (kullanıcı kendi event'lerini görür,
+  insert eder; update/delete bloklu — append-only history). Store mutation'ları
+  fire-and-forget log atıyor (`application_created`, `status_changed`,
+  `note_added`, `follow_up_set/cleared/completed`, `pinned/unpinned`,
+  `resume_uploaded`, CSV import için `via:"csv_import"` payload). Detail
+  sayfasındaki timeline `useApplicationActivity` ile gerçek event'lerden
+  besleniyor; eski (pre-migration) başvurular için synthetic fallback duruyor.
 
 ---
 
@@ -244,7 +250,7 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 
 - **i18n (TR) çevirileri** application-form ve app-shell kalan inline string'ler (§5.3)
 - ~~**Cmd+K command palette**~~ DONE
-- **Activity timeline** synthetic — gerçek event log tablosu eklenmeli
+- ~~**Activity timeline** synthetic~~ DONE — gerçek `activity_events` tablosu.
 - **Pipeline progress click → status değişimi** çalışıyor ama optimistic update'i henüz yok
 - **Kanban mobile** swipe pattern brief'te vardı ama henüz yapılmadı (mevcut kanban grid mobile'da yatay scroll)
 

@@ -19,7 +19,12 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useApplicationStore } from "@/store";
-import type { JobApplication, ApplicationStatus } from "@/types";
+import { activityService } from "@/lib/supabase/activity";
+import type {
+  JobApplication,
+  ApplicationStatus,
+  ActivityEventRecord,
+} from "@/types";
 
 /**
  * Pipeline progress bar — clickable stepper for the 7 active statuses.
@@ -182,9 +187,9 @@ export interface ActivityEvent {
 }
 
 /**
- * Synthesize a minimal activity feed from the JobApplication record.
- * The full feed will come from a dedicated table; for now we render
- * the “created” and “last updated” signposts plus inline notes.
+ * Synthesize an activity feed from the JobApplication record. Used as a
+ * fallback for applications that pre-date the activity_events table (no real
+ * log to render against).
  */
 export function buildSyntheticActivity(app: JobApplication): ActivityEvent[] {
   const created: ActivityEvent = {
@@ -207,6 +212,121 @@ export function buildSyntheticActivity(app: JobApplication): ActivityEvent[] {
     });
   }
   return events;
+}
+
+/**
+ * Live activity feed for a single application. Fetches once when the app
+ * becomes available and falls back to the synthetic feed if the table is
+ * empty (applications created before logging existed). Newest first.
+ *
+ * Accepts `app | undefined` so callers can place the hook above their
+ * loading-state early-return (rules of hooks).
+ */
+export function useApplicationActivity(app: JobApplication | undefined): {
+  events: ActivityEvent[];
+  loading: boolean;
+} {
+  const [records, setRecords] = React.useState<ActivityEventRecord[] | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const appId = app?.id;
+
+  React.useEffect(() => {
+    if (!appId) return;
+    let cancelled = false;
+    setLoading(true);
+    activityService
+      .listForApplication(appId, 100)
+      .then((r) => {
+        if (!cancelled) setRecords(r);
+      })
+      .catch(() => {
+        if (!cancelled) setRecords([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [appId]);
+
+  const events = React.useMemo<ActivityEvent[]>(() => {
+    if (!app) return [];
+    if (!records || records.length === 0) return buildSyntheticActivity(app);
+    return records.map((r) => recordToActivityEvent(r, app));
+  }, [records, app]);
+
+  return { events, loading };
+}
+
+function recordToActivityEvent(
+  r: ActivityEventRecord,
+  app: JobApplication,
+): ActivityEvent {
+  const date = format(new Date(r.createdAt), "MMM d");
+  const p = r.payload as Record<string, unknown>;
+
+  switch (r.kind) {
+    case "application_created": {
+      const company = (p.company as string) || app.companyName;
+      const position = (p.position as string) || app.position;
+      const via = p.via === "csv_import" ? " (CSV import)" : "";
+      return {
+        date,
+        text: `Added ${company} — ${position}${via}`,
+        status: "applied",
+      };
+    }
+    case "status_changed": {
+      const to = p.to as JtStatusKey | undefined;
+      const label = to ? STATUS_TOKENS[to]?.label || to : "—";
+      return {
+        date,
+        text: `Status changed to ${label}`,
+        status: to,
+      };
+    }
+    case "note_added": {
+      const note = (p.note as string) || "";
+      const truncated = note.length > 120 ? note.slice(0, 120) + "…" : note;
+      return {
+        date,
+        text: truncated ? `Note: "${truncated}"` : "Note updated",
+      };
+    }
+    case "follow_up_set": {
+      const d = p.date as string | undefined;
+      return {
+        date,
+        text: d
+          ? `Follow-up set for ${format(new Date(d), "MMM d")}`
+          : "Follow-up set",
+      };
+    }
+    case "follow_up_cleared":
+      return { date, text: "Follow-up cleared" };
+    case "follow_up_completed": {
+      const d = p.date as string | undefined;
+      return {
+        date,
+        text: d
+          ? `Follow-up done (was ${format(new Date(d), "MMM d")})`
+          : "Follow-up done",
+      };
+    }
+    case "pinned":
+      return { date, text: "Pinned" };
+    case "unpinned":
+      return { date, text: "Unpinned" };
+    case "resume_uploaded":
+      return { date, text: "Resume updated" };
+    case "contact_added": {
+      const name = (p.name as string) || "Contact";
+      return { date, text: `Added contact: ${name}` };
+    }
+    default:
+      return { date, text: r.kind.replace(/_/g, " ") };
+  }
 }
 
 export function JtActivityTimeline({ events }: { events: ActivityEvent[] }) {

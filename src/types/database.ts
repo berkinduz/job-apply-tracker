@@ -91,6 +91,26 @@ export interface Database {
         };
         Relationships: [];
       };
+      activity_events: {
+        Row: {
+          id: string;
+          application_id: string;
+          user_id: string;
+          kind: string;
+          payload: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          application_id: string;
+          user_id: string;
+          kind: string;
+          payload?: Json;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["activity_events"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
