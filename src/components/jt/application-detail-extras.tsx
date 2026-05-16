@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { format, formatDistanceToNow } from "date-fns";
-import { Bell, Plus, Sparkles } from "lucide-react";
+import { Bell, Plus, Sparkles, Check, X, CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   JtButton,
@@ -11,6 +12,13 @@ import {
   PIPELINE_STATUSES,
   type JtStatusKey,
 } from "@/components/jt/primitives";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { useApplicationStore } from "@/store";
 import type { JobApplication, ApplicationStatus } from "@/types";
 
 /**
@@ -318,41 +326,7 @@ export function JtDetailSidebar({ app }: { app: JobApplication }) {
         alignSelf: "flex-start",
       }}
     >
-      <div
-        style={{
-          background: "var(--jt-bg-elev)",
-          border: "1px solid var(--jt-border)",
-          borderRadius: "var(--r-lg)",
-          padding: 18,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 12,
-            color: "var(--jt-text-3)",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            fontWeight: 500,
-            marginBottom: 12,
-          }}
-        >
-          Quick actions
-        </div>
-        <JtButton full size="md" icon={<Bell size={14} />}>
-          Set follow-up
-        </JtButton>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
-          <JtButton full variant="secondary" size="sm" icon={<Plus size={12} />}>
-            Add contact
-          </JtButton>
-          <JtButton full variant="secondary" size="sm" icon={<Plus size={12} />}>
-            Upload resume version
-          </JtButton>
-          <JtButton full variant="secondary" size="sm" icon={<Plus size={12} />}>
-            Add note
-          </JtButton>
-        </div>
-      </div>
+      <FollowUpCard app={app} />
 
       {isOffer && (
         <div
@@ -444,6 +418,288 @@ export function JtDetailSidebar({ app }: { app: JobApplication }) {
         Press <span className="kbd">E</span> to edit, <span className="kbd">P</span> to pin
       </div>
     </aside>
+  );
+}
+
+function FollowUpCard({ app }: { app: JobApplication }) {
+  const { setFollowUp, completeFollowUp } = useApplicationStore();
+  const [open, setOpen] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const followUp = app.followUpDate ? new Date(app.followUpDate) : undefined;
+  const isCompleted = Boolean(app.followUpCompletedAt);
+  const isOverdue =
+    followUp !== undefined && !isCompleted && followUp < today;
+  const isToday =
+    followUp !== undefined && followUp.toDateString() === today.toDateString();
+
+  const handlePick = async (d: Date) => {
+    setBusy(true);
+    try {
+      await setFollowUp(app.id, format(d, "yyyy-MM-dd"));
+      setOpen(false);
+      toast.success(`We'll nudge you on ${format(d, "MMM d")}.`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleQuick = (days: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + days);
+    handlePick(d);
+  };
+
+  const handleDone = async () => {
+    setBusy(true);
+    try {
+      await completeFollowUp(app.id);
+      toast.success("Follow-up marked done.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setBusy(true);
+    try {
+      await setFollowUp(app.id, null);
+      toast.success("Follow-up cleared.");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const accent = isOverdue
+    ? "var(--st-rejected)"
+    : isToday
+      ? "var(--a-500)"
+      : "var(--p-500)";
+
+  return (
+    <div
+      style={{
+        background: "var(--jt-bg-elev)",
+        border: `1px solid ${followUp && !isCompleted ? accent : "var(--jt-border)"}`,
+        borderRadius: "var(--r-lg)",
+        padding: 18,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          color: "var(--jt-text-3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          fontWeight: 500,
+          marginBottom: 12,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <Bell size={12} /> Follow-up
+      </div>
+
+      {!followUp && (
+        <>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--jt-text-2)",
+              margin: "0 0 12px",
+              lineHeight: 1.5,
+            }}
+          >
+            Set a reminder so this doesn&apos;t slip into the void.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            <QuickButton onClick={() => handleQuick(3)} disabled={busy}>
+              In 3 days
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(7)} disabled={busy}>
+              In 1 week
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(14)} disabled={busy}>
+              In 2 weeks
+            </QuickButton>
+          </div>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <JtButton full variant="secondary" size="sm" icon={<CalendarIcon size={12} />}>
+                Pick a date
+              </JtButton>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={followUp}
+                onSelect={(d) => d && handlePick(d)}
+                disabled={(d) => d < today}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </>
+      )}
+
+      {followUp && !isCompleted && (
+        <>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              color: accent,
+              marginBottom: 2,
+            }}
+          >
+            {format(followUp, "EEEE, MMM d")}
+          </div>
+          <div style={{ fontSize: 13, color: "var(--jt-text-2)", marginBottom: 12 }}>
+            {isOverdue
+              ? `Overdue · ${formatDistanceToNow(followUp, { addSuffix: true })}`
+              : isToday
+                ? "Today — time to nudge them."
+                : formatDistanceToNow(followUp, { addSuffix: true })}
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <JtButton
+              size="sm"
+              variant="accent"
+              icon={<Check size={12} />}
+              onClick={handleDone}
+              disabled={busy}
+            >
+              Mark done
+            </JtButton>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <JtButton size="sm" variant="secondary" icon={<CalendarIcon size={12} />}>
+                  Reschedule
+                </JtButton>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={followUp}
+                  onSelect={(d) => d && handlePick(d)}
+                  disabled={(d) => d < today}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={busy}
+              aria-label="Clear follow-up"
+              style={{
+                width: 32,
+                background: "transparent",
+                border: "1px solid var(--jt-border)",
+                borderRadius: "var(--r-md)",
+                color: "var(--jt-text-3)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={13} />
+            </button>
+          </div>
+        </>
+      )}
+
+      {followUp && isCompleted && (
+        <>
+          <div
+            style={{
+              fontSize: 13,
+              color: "var(--st-accepted)",
+              fontWeight: 600,
+              marginBottom: 4,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Check size={14} /> Done
+          </div>
+          <div style={{ fontSize: 12, color: "var(--jt-text-3)", marginBottom: 12 }}>
+            Was due {format(followUp, "MMM d")}
+          </div>
+          <JtButton
+            size="sm"
+            variant="secondary"
+            full
+            icon={<Bell size={12} />}
+            onClick={() => setOpen(true)}
+            disabled={busy}
+          >
+            Set another reminder
+          </JtButton>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <span hidden />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                onSelect={(d) => d && handlePick(d)}
+                disabled={(d) => d < today}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </>
+      )}
+    </div>
+  );
+}
+
+function QuickButton({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="focus-ring"
+      style={{
+        padding: "6px 10px",
+        background: "var(--jt-bg-sunk)",
+        border: "1px solid var(--jt-border)",
+        borderRadius: "var(--r-md)",
+        fontSize: 12,
+        color: "var(--jt-text)",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.6 : 1,
+        fontWeight: 500,
+      }}
+    >
+      {children}
+    </button>
   );
 }
 

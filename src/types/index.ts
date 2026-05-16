@@ -44,6 +44,9 @@ export interface JobApplication {
   contacts: ContactPerson[];
   status: ApplicationStatus;
   isPinned: boolean;
+  followUpDate?: string;
+  followUpSentAt?: string;
+  followUpCompletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +70,7 @@ export interface ApplicationFormData {
   notes?: string;
   contacts: ContactPerson[];
   status: ApplicationStatus;
+  followUpDate?: string;
 }
 
 // Filter options
@@ -103,4 +107,5 @@ export interface AppSettings {
   language: "en" | "tr";
   customSources: string[];
   customIndustries: string[];
+  followUpEmails: boolean;
 }

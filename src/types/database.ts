@@ -31,17 +31,29 @@ export interface Database {
           contacts: Json;
           status: string;
           is_pinned: boolean;
+          follow_up_date: string | null;
+          follow_up_sent_at: string | null;
+          follow_up_completed_at: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: Omit<
           Database["public"]["Tables"]["applications"]["Row"],
-          "id" | "created_at" | "updated_at" | "is_pinned"
+          | "id"
+          | "created_at"
+          | "updated_at"
+          | "is_pinned"
+          | "follow_up_date"
+          | "follow_up_sent_at"
+          | "follow_up_completed_at"
         > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
           is_pinned?: boolean;
+          follow_up_date?: string | null;
+          follow_up_sent_at?: string | null;
+          follow_up_completed_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["applications"]["Row"]>;
         Relationships: [];
@@ -53,6 +65,7 @@ export interface Database {
           hide_rejected: boolean;
           custom_sources: string[];
           custom_industries: string[];
+          follow_up_emails: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -62,6 +75,7 @@ export interface Database {
           hide_rejected?: boolean;
           custom_sources?: string[];
           custom_industries?: string[];
+          follow_up_emails?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -71,6 +85,7 @@ export interface Database {
           hide_rejected?: boolean;
           custom_sources?: string[];
           custom_industries?: string[];
+          follow_up_emails?: boolean;
           created_at?: string;
           updated_at?: string;
         };

@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 
 import { JtButton, JtPill } from "@/components/jt/primitives";
+import { createClient } from "@/lib/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -137,6 +138,15 @@ export function JtSettings({ userEmail }: { userEmail?: string | null }) {
             />
           </Field>
         </Row>
+      </Card>
+
+      <Card
+        title="Notifications"
+        description="Daily email at 08:00 UTC for follow-ups that hit their due date."
+      >
+        <Field label="Follow-up reminders" hint="Email me when an application I set a follow-up for is due.">
+          <FollowUpEmailToggle />
+        </Field>
       </Card>
 
       <Card title="Customization" description="Bend the app to your search style.">
@@ -295,6 +305,47 @@ export function JtSettings({ userEmail }: { userEmail?: string | null }) {
   );
 }
 
+function FollowUpEmailToggle() {
+  const [checked, setChecked] = React.useState(true);
+  const [loaded, setLoaded] = React.useState(false);
+  const supabase = React.useMemo(() => createClient(), []);
+
+  React.useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data } = await supabase
+        .from("user_settings")
+        .select("follow_up_emails")
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      // Default to opted-in if no row exists yet.
+      setChecked(data?.follow_up_emails ?? true);
+      setLoaded(true);
+    })();
+  }, [supabase]);
+
+  const onChange = async (next: boolean) => {
+    setChecked(next);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { error } = await supabase
+      .from("user_settings")
+      .upsert(
+        { user_id: u.user.id, follow_up_emails: next, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" },
+      );
+    if (error) {
+      setChecked(!next);
+      toast.error(error.message);
+    } else {
+      toast.success(next ? "Reminders on." : "Reminders off.");
+    }
+  };
+
+  return <ToggleSwitch checked={checked} onChange={onChange} disabled={!loaded} />;
+}
+
 function Card({
   title,
   description,
@@ -440,15 +491,18 @@ function PillGroup<V extends string>({
 function ToggleSwitch({
   checked,
   onChange,
+  disabled,
 }: {
   checked: boolean;
   onChange: (next: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
       className="focus-ring"
       style={{
@@ -458,7 +512,8 @@ function ToggleSwitch({
         border: `1.5px solid ${checked ? "var(--p-500)" : "var(--jt-border)"}`,
         borderRadius: 99,
         position: "relative",
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.5 : 1,
         transition: "all 150ms var(--jt-ease)",
         padding: 0,
         marginTop: 4,

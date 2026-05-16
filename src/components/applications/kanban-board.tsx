@@ -3,7 +3,7 @@
 import { useState, useRef, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { Calendar, MapPin, Briefcase } from "lucide-react";
+import { Calendar, MapPin, Briefcase, Bell } from "lucide-react";
 import {
   STATUS_ORDER,
   STATUS_CONFIG,
@@ -201,11 +201,57 @@ function KanbanCard({
         </span>
       </div>
 
+      <FollowUpChip
+        followUpDate={application.followUpDate}
+        completedAt={application.followUpCompletedAt}
+      />
+
       {application.isPinned && (
         <p className="mt-2 text-[11px] font-medium text-primary">
           {pinnedLabel}
         </p>
       )}
     </div>
+  );
+}
+
+function FollowUpChip({
+  followUpDate,
+  completedAt,
+}: {
+  followUpDate?: string;
+  completedAt?: string;
+}) {
+  if (!followUpDate || completedAt) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(followUpDate);
+  due.setHours(0, 0, 0, 0);
+  const days = Math.round((due.getTime() - today.getTime()) / 86400000);
+  const overdue = days < 0;
+  const todayLabel = days === 0;
+  const soon = days > 0 && days <= 3;
+  if (!overdue && !todayLabel && !soon) return null;
+
+  const label = overdue
+    ? `Overdue ${Math.abs(days)}d`
+    : todayLabel
+      ? "Follow up today"
+      : `In ${days}d`;
+
+  return (
+    <span
+      className={cn(
+        "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-[2px] text-[10px] font-semibold",
+        overdue
+          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+          : todayLabel
+            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+            : "bg-primary/10 text-primary"
+      )}
+    >
+      <Bell className="h-3 w-3" />
+      {label}
+    </span>
   );
 }

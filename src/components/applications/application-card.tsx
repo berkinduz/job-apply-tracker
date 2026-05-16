@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
+  Bell,
 } from "lucide-react";
 import { JobApplication } from "@/types";
 import { STATUS_CONFIG, WORK_TYPE_CONFIG } from "@/config/constants";
@@ -119,6 +120,10 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
                   <Calendar className="h-3.5 w-3.5" />
                   {format(new Date(application.applicationDate), "MMM d, yyyy")}
                 </span>
+                <FollowUpBadge
+                  followUpDate={application.followUpDate}
+                  completedAt={application.followUpCompletedAt}
+                />
                 {/* Skills */}
                 {application.skills && application.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -242,5 +247,43 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function FollowUpBadge({
+  followUpDate,
+  completedAt,
+}: {
+  followUpDate?: string;
+  completedAt?: string;
+}) {
+  if (!followUpDate || completedAt) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(followUpDate);
+  due.setHours(0, 0, 0, 0);
+  const days = Math.round((due.getTime() - today.getTime()) / 86400000);
+  if (days > 7) return null;
+  const overdue = days < 0;
+  const todayLabel = days === 0;
+  const label = overdue
+    ? `Overdue ${Math.abs(days)}d`
+    : todayLabel
+      ? "Follow up today"
+      : `Follow up in ${days}d`;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+        overdue
+          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+          : todayLabel
+            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+            : "bg-primary/10 text-primary"
+      )}
+    >
+      <Bell className="h-3 w-3" />
+      {label}
+    </span>
   );
 }

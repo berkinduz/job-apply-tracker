@@ -165,7 +165,7 @@ REVOKE INSERT, UPDATE, DELETE ON skill_suggestions FROM anon, authenticated;
 ```
 
 ### 6.2 İleride ekleyebileceğin alanlar (pazar talebine göre)
-- `applications.follow_up_date` (timestamptz, nullable) — stale reminder geliştirmek için
+- ~~`applications.follow_up_date`~~ DONE (date + sent_at + completed_at).
 - `applications.offer_details` (jsonb) — base salary, equity, sign-on, deadline
 - `applications.archived_at` (timestamptz, nullable) — soft delete
 - `user_settings.weekly_goal` (int, nullable) — onboarding goal kullanıcıdan alındı ama henüz saklanmıyor
@@ -181,7 +181,14 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 2. **AI job-spec özet** — yapıştırılan JD'yi Anthropic API ile özet (Sonnet 4 ucuz tutar).
 3. **Email forwarding** — `you@inbox.jobtrack.app` adresini kullanıcıya ata; gelen mail'i otomatik application'a dönüştür.
 4. **Browser extension** — LinkedIn job sayfasında "Track in JobTrack" butonu.
-5. **Follow-up reminders** — `follow_up_date` + cron + email/push delivery.
+5. ~~**Follow-up reminders**~~ — DONE. `follow_up_date` + `follow_up_sent_at` +
+   `follow_up_completed_at` migration uygulandı. Form'da Stay-on-it card (preset
+   chips + calendar). Detail sidebar'da FollowUpCard (state-aware: empty/active/
+   overdue/today/done) + Done/Reschedule/Clear actions. Liste/Kanban'da
+   "Overdue Nd"/"Follow up today"/"Follow up in Nd" badge'leri. Vercel cron
+   (`vercel.json`, daily 08:00 UTC) → `/api/cron/follow-ups`: service-role
+   tabanlı, opt-out kontrol eden, Resend ile email gönderen, `follow_up_sent_at`
+   damgalayan idempotent worker. Settings'te user-level opt-out toggle.
 6. **CSV import** — onboarding 1. adımdaki "Import from CSV" karşılığı.
 7. **Public profile / share** — viral loop. `jobtrack.com/u/berkin` → kullanıcının funnel istatistikleri (sayılar değil yüzdeler).
 8. ~~**Klavye kısayolları (Cmd+K palette)**~~ — DONE. cmdk dialog ile gerçek
@@ -207,6 +214,9 @@ Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` ve `NEXT_PUBLIC_SUPABASE_ANON_KEY` Vercel'de set
 - [ ] `NEXT_PUBLIC_SITE_URL=https://jobapplytracker.com` Vercel'de set
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` Vercel'de set (cron worker için, **server-only**, asla client'e expose etme)
+- [ ] `CRON_SECRET` Vercel'de set (Vercel cron `Authorization: Bearer <CRON_SECRET>` ile çağırır; rastgele 32+ char)
+- [ ] `RESEND_API_KEY` Vercel'de set; `EMAIL_FROM` (default `reminders@jobapplytracker.com`) domain'in Resend'de verify edilmiş olmalı (SPF + DKIM)
 - [ ] Storage bucket `resumes` private + RLS policy'leri (§1.4)
 - [ ] Leaked password protection açık (§1.1)
 - [ ] Custom SMTP bağlı (§1.3) — yoksa email magic link 3/saat'i geçemez

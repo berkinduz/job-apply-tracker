@@ -37,6 +37,8 @@ interface ApplicationState {
   ) => Promise<void>;
   deleteApplication: (id: string) => Promise<void>;
   togglePin: (id: string) => Promise<void>;
+  setFollowUp: (id: string, date: string | null) => Promise<void>;
+  completeFollowUp: (id: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setFilters: (filters: FilterOptions) => void;
   setSort: (sort: SortOptions) => void;
@@ -210,6 +212,65 @@ export const useApplicationStore = create<ApplicationState>()((set, get) => ({
     }
   },
 
+  setFollowUp: async (id, date) => {
+    const previous = get().applications.find((a) => a.id === id);
+    if (!previous) return;
+
+    // Optimistic update — null clears, string sets/re-arms
+    set((state) => ({
+      applications: state.applications.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              followUpDate: date || undefined,
+              followUpSentAt: undefined,
+              followUpCompletedAt: undefined,
+            }
+          : a,
+      ),
+    }));
+
+    try {
+      if (date) {
+        await applicationService.setFollowUp(id, date);
+      } else {
+        await applicationService.clearFollowUp(id);
+      }
+    } catch (error) {
+      set((state) => ({
+        applications: state.applications.map((a) =>
+          a.id === id ? previous : a,
+        ),
+        error: (error as Error).message,
+      }));
+      throw error;
+    }
+  },
+
+  completeFollowUp: async (id) => {
+    const previous = get().applications.find((a) => a.id === id);
+    if (!previous) return;
+    const now = new Date().toISOString();
+
+    set((state) => ({
+      applications: state.applications.map((a) =>
+        a.id === id ? { ...a, followUpCompletedAt: now } : a,
+      ),
+    }));
+
+    try {
+      await applicationService.completeFollowUp(id);
+    } catch (error) {
+      set((state) => ({
+        applications: state.applications.map((a) =>
+          a.id === id ? previous : a,
+        ),
+        error: (error as Error).message,
+      }));
+      throw error;
+    }
+  },
+
   setSearchQuery: (query) => set({ searchQuery: query }),
 
   setFilters: (filters) => set({ filters }),
@@ -341,6 +402,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
     language: "en",
     customSources: [],
     customIndustries: [],
+    followUpEmails: true,
   },
 
   updateSettings: (newSettings) => {

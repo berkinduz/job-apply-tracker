@@ -27,6 +27,9 @@ export function dbToApplication(row: DbApplication): JobApplication {
     contacts: (row.contacts as unknown as ContactPerson[]) || [],
     status: row.status as JobApplication["status"],
     isPinned: row.is_pinned,
+    followUpDate: row.follow_up_date || undefined,
+    followUpSentAt: row.follow_up_sent_at || undefined,
+    followUpCompletedAt: row.follow_up_completed_at || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -58,6 +61,7 @@ export function applicationToDb(
       app.contacts as unknown as Database["public"]["Tables"]["applications"]["Insert"]["contacts"],
     status: app.status,
     is_pinned: false,
+    follow_up_date: app.followUpDate || null,
   };
 }
 
@@ -137,6 +141,13 @@ export const applicationService = {
     if (data.notes !== undefined) updateData.notes = data.notes || null;
     if (data.contacts !== undefined) updateData.contacts = data.contacts;
     if (data.status !== undefined) updateData.status = data.status;
+    if (data.followUpDate !== undefined) {
+      updateData.follow_up_date = data.followUpDate || null;
+      // Re-arming a follow-up clears prior delivery + completion bookkeeping
+      // so the cron picks it up again.
+      updateData.follow_up_sent_at = null;
+      updateData.follow_up_completed_at = null;
+    }
 
     const { data: updated, error } = await supabase
       .from("applications")
@@ -158,6 +169,43 @@ export const applicationService = {
     const { error } = await supabase
       .from("applications")
       .update({ is_pinned: !isPinned, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  async setFollowUp(id: string, date: string): Promise<void> {
+    const { error } = await supabase
+      .from("applications")
+      .update({
+        follow_up_date: date,
+        follow_up_sent_at: null,
+        follow_up_completed_at: null,
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  async clearFollowUp(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("applications")
+      .update({
+        follow_up_date: null,
+        follow_up_sent_at: null,
+        follow_up_completed_at: null,
+        updated_at: new Date().toISOString(),
+      } as never)
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  async completeFollowUp(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("applications")
+      .update({
+        follow_up_completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as never)
       .eq("id", id);
     if (error) throw error;
   },

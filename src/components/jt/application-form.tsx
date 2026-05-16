@@ -73,6 +73,9 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
   const [date, setDate] = React.useState<Date>(
     application?.applicationDate ? new Date(application.applicationDate) : new Date(),
   );
+  const [followUpDate, setFollowUpDate] = React.useState<Date | undefined>(
+    application?.followUpDate ? new Date(application.followUpDate) : undefined,
+  );
   const [resumeFile, setResumeFile] = React.useState<File | null>(null);
   const [resumePath, setResumePath] = React.useState(application?.resumePath || "");
   const [resumeBusy, setResumeBusy] = React.useState(false);
@@ -101,6 +104,7 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
             notes: application.notes,
             contacts: application.contacts,
             status: application.status,
+            followUpDate: application.followUpDate,
           }
         : {
             companyName: "",
@@ -491,6 +495,24 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
           </Field>
         </FormCard>
 
+        {/* Follow-up — nudge the user when this application goes stale. */}
+        <FormCard
+          title="Stay on it"
+          description="Pick a date and we'll email you a reminder so this doesn't slip."
+        >
+          <Field label="Follow-up date" optional>
+            <FollowUpPicker
+              value={followUpDate}
+              onChange={(d) => {
+                setFollowUpDate(d);
+                setValue("followUpDate", d ? format(d, "yyyy-MM-dd") : undefined);
+              }}
+              applicationDate={date}
+            />
+            <input type="hidden" {...register("followUpDate")} />
+          </Field>
+        </FormCard>
+
         {/* Your prep */}
         <FormCard title="Your prep" description="Anything that helps you land the role.">
           <Field label="Skills" optional>
@@ -797,6 +819,120 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
 }
 
 /* ---------- subcomponents ---------- */
+
+function FollowUpPicker({
+  value,
+  onChange,
+  applicationDate,
+}: {
+  value: Date | undefined;
+  onChange: (d: Date | undefined) => void;
+  applicationDate: Date;
+}) {
+  const presets: { label: string; days: number }[] = [
+    { label: "In 3 days", days: 3 },
+    { label: "In 1 week", days: 7 },
+    { label: "In 2 weeks", days: 14 },
+  ];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {presets.map((p) => {
+          const target = new Date(applicationDate);
+          target.setDate(target.getDate() + p.days);
+          if (target < today) {
+            target.setTime(today.getTime());
+            target.setDate(target.getDate() + p.days);
+          }
+          const active =
+            value && format(value, "yyyy-MM-dd") === format(target, "yyyy-MM-dd");
+          return (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => onChange(target)}
+              className="focus-ring"
+              style={{
+                padding: "7px 12px",
+                borderRadius: "var(--r-md)",
+                border: active ? "1.5px solid var(--p-500)" : "1.5px solid var(--jt-border)",
+                background: active ? "var(--p-50)" : "var(--jt-bg-elev)",
+                color: active ? "var(--p-700)" : "var(--jt-text)",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="focus-ring"
+              style={{
+                padding: "7px 12px",
+                borderRadius: "var(--r-md)",
+                border: "1.5px solid var(--jt-border)",
+                background: "var(--jt-bg-elev)",
+                color: "var(--jt-text)",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <CalendarIcon size={13} />
+              {value ? format(value, "PP") : "Pick a date"}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={value}
+              onSelect={(d) => onChange(d || undefined)}
+              disabled={(d) => d < today}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange(undefined)}
+            style={{
+              padding: "7px 10px",
+              borderRadius: "var(--r-md)",
+              border: "1.5px solid var(--jt-border)",
+              background: "transparent",
+              color: "var(--jt-text-3)",
+              fontSize: 13,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <X size={12} /> Clear
+          </button>
+        )}
+      </div>
+      {value && (
+        <div style={{ fontSize: 12, color: "var(--jt-text-2)" }}>
+          We&apos;ll email you on{" "}
+          <strong style={{ color: "var(--jt-text)" }}>{format(value, "EEEE, MMM d")}</strong>.
+        </div>
+      )}
+    </div>
+  );
+}
 
 function FormCard({
   title,
