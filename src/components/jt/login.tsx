@@ -147,44 +147,34 @@ export function JtLogin() {
         flexDirection: "column",
       }}
     >
-      {/* Top thin header for mobile — just a back link; brand logo lives in the form panel/aside */}
+      {/* Top thin header — brand on the left, home link on the right */}
       <header
-        className="jt-only-mobile"
         style={{
-          padding: "14px 20px 0",
+          padding: "16px 20px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          borderBottom: "1px solid var(--jt-border-2)",
         }}
       >
         <Link
           href="/"
-          style={{ fontSize: 13, color: "var(--jt-text-3)" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
         >
+          <JtLogo size={22} />
+          <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: "-0.02em" }}>
+            jobtrack
+          </span>
+        </Link>
+        <Link href="/" style={{ fontSize: 13, color: "var(--jt-text-3)" }}>
           {t("homeLink")}
         </Link>
       </header>
 
       <div className="jt-login-grid">
-        {/* Left brand panel */}
+        {/* Left brand panel — branding lives in the header, so we go straight
+            to the mockup and quote to keep the page in one viewport. */}
         <aside className="jt-login-aside">
-          <Link
-            href="/"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "32px 40px 0",
-              color: "#fff",
-              position: "relative",
-              zIndex: 2,
-            }}
-          >
-            <JtLogo size={26} color="#fff" />
-            <span style={{ fontWeight: 600, fontSize: 18, letterSpacing: "-0.02em" }}>
-              jobtrack
-            </span>
-          </Link>
           <BrandMockup />
           <div className="jt-login-quote">
             <Sparkles size={14} color="var(--a-300)" />

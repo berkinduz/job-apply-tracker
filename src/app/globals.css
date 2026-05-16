@@ -331,15 +331,16 @@
   .jt-login-aside {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     background:
       linear-gradient(135deg, rgba(58, 60, 184, 0.92), rgba(36, 38, 120, 0.95)),
       radial-gradient(circle at 70% 20%, rgba(245, 184, 66, 0.35), transparent 50%);
     color: #fff;
     position: relative;
     overflow: hidden;
-    min-height: 100vh;
+    padding-top: 24px;
   }
-  .jt-login-form-wrap { padding: 32px; }
+  .jt-login-form-wrap { padding: 24px 32px; }
 }
 
 /* Two-col rows in application form on tablet+ */

@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   keywords: siteConfig.keywords,
   applicationName: siteConfig.name,
   manifest: "/manifest.webmanifest",
+  icons: {
+    // Modern browsers prefer the SVG; legacy fall back to favicon.ico.
+    // Explicit ordering trumps Next's auto-discovery and beats stale caches.
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+    ],
+    apple: [{ url: "/apple-icon" }],
+  },
   openGraph: {
     type: "website",
     url: siteConfig.url,
