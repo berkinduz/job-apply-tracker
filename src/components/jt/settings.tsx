@@ -22,6 +22,7 @@ import { JtButton, JtPill } from "@/components/jt/primitives";
 import { createClient } from "@/lib/supabase/client";
 import { CsvImportDialog } from "@/components/jt/csv-import-dialog";
 import { PublicProfileCard } from "@/components/jt/public-profile-card";
+import { clearAllData, deleteAccount } from "@/app/settings/danger-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +62,8 @@ export function JtSettings({
   const [newSource, setNewSource] = React.useState("");
   const [newIndustry, setNewIndustry] = React.useState("");
   const [showClear, setShowClear] = React.useState(false);
+  const [showDelete, setShowDelete] = React.useState(false);
+  const [dangerBusy, setDangerBusy] = React.useState(false);
   const [showImport, setShowImport] = React.useState(false);
 
   const handleLanguageChange = (locale: "en" | "tr") => {
@@ -246,16 +249,27 @@ export function JtSettings({
               lineHeight: 1.55,
             }}
           >
-            Clears every application and setting from this account. Cannot be undone.
+            Two flavors — wipe your applications but keep the account, or
+            torch everything including sign-in. Both are permanent.
           </p>
-          <JtButton
-            variant="danger"
-            size="sm"
-            icon={<Trash2 size={14} />}
-            onClick={() => setShowClear(true)}
-          >
-            Clear all data
-          </JtButton>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <JtButton
+              variant="secondary"
+              size="sm"
+              icon={<Trash2 size={14} />}
+              onClick={() => setShowClear(true)}
+            >
+              Clear all data
+            </JtButton>
+            <JtButton
+              variant="danger"
+              size="sm"
+              icon={<Trash2 size={14} />}
+              onClick={() => setShowDelete(true)}
+            >
+              Delete account
+            </JtButton>
+          </div>
         </div>
       </Card>
 
@@ -303,33 +317,137 @@ export function JtSettings({
           <AlertDialogHeader>
             <AlertDialogTitle>Clear all your data?</AlertDialogTitle>
             <AlertDialogDescription>
-              Every application and setting will be deleted. This can&apos;t be undone — you may want
-              to export first.
+              Every application, note, resume, and saved preference will be permanently
+              deleted from our servers. Your sign-in stays so you can start fresh. Export
+              first if you want a backup.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={dangerBusy}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                localStorage.removeItem("job-apply-track-applications");
-                localStorage.removeItem("job-apply-track-settings");
-                toast.success("Cleared. Refreshing…");
-                setShowClear(false);
-                window.location.reload();
+              disabled={dangerBusy}
+              onClick={async () => {
+                setDangerBusy(true);
+                const r = await clearAllData();
+                if (r.ok) {
+                  toast.success("Cleared. Refreshing…");
+                  setShowClear(false);
+                  // localStorage holds a cached snapshot of the now-empty data.
+                  localStorage.removeItem("job-apply-track-applications");
+                  localStorage.removeItem("job-apply-track-settings");
+                  window.location.href = "/applications";
+                } else {
+                  toast.error(r.error);
+                  setDangerBusy(false);
+                }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Yes, clear everything
+              {dangerBusy ? "Clearing…" : "Yes, clear everything"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DeleteAccountDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        busy={dangerBusy}
+        setBusy={setDangerBusy}
+      />
 
       {/* keep next-intl import warm during the migration */}
       <span style={{ display: "none" }} aria-hidden>
         {t("common.appName")}
       </span>
     </main>
+  );
+}
+
+function DeleteAccountDialog({
+  open,
+  onOpenChange,
+  busy,
+  setBusy,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+}) {
+  const [confirm, setConfirm] = React.useState("");
+  const ok = confirm.trim().toUpperCase() === "DELETE";
+
+  React.useEffect(() => {
+    if (!open) setConfirm("");
+  }, [open]);
+
+  const handleDelete = async () => {
+    setBusy(true);
+    const r = await deleteAccount();
+    if (r.ok) {
+      toast.success("Account deleted. Goodbye 👋");
+      localStorage.clear();
+      window.location.href = "/";
+    } else {
+      toast.error(r.error);
+      setBusy(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This permanently deletes your sign-in, every application, all resumes
+            you uploaded, and your settings. You can sign up again later but the
+            data is gone forever.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div style={{ padding: "8px 0 4px" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: 12,
+              color: "var(--jt-text-2)",
+              marginBottom: 6,
+            }}
+          >
+            Type <code style={{ fontFamily: "var(--font-mono)", color: "var(--st-rejected)" }}>DELETE</code> to confirm
+          </label>
+          <input
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="DELETE"
+            disabled={busy}
+            style={{
+              width: "100%",
+              height: 40,
+              padding: "0 12px",
+              background: "var(--jt-bg-elev)",
+              border: "1.5px solid var(--jt-border)",
+              borderRadius: "var(--r-md)",
+              color: "var(--jt-text)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 14,
+              outline: "none",
+            }}
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={!ok || busy}
+            onClick={handleDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {busy ? "Deleting…" : "Delete my account"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

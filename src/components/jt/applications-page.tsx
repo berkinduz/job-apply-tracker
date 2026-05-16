@@ -16,6 +16,10 @@ import {
   Trash2,
   List as ListIcon,
   Columns3 as KanbanIcon,
+  Bell,
+  TrendingUp,
+  CalendarDays,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,7 +56,7 @@ import type { JobApplication } from "@/types";
 
 const VIEW_MODE_KEY = "jt-view-mode";
 
-type Filter = "active" | "all" | "closed";
+type Filter = "active" | "all" | "closed" | "week" | "stale" | "followup";
 
 function isStale(a: JobApplication): boolean {
   const ms = Date.now() - new Date(a.updatedAt).getTime();
@@ -103,11 +107,19 @@ export function JtApplicationsPage() {
   };
 
   const filtered = React.useMemo(() => {
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return applications
       .filter((a) => {
         const closed = a.status === "rejected" || a.status === "accepted";
         if (filter === "active" && closed) return false;
         if (filter === "closed" && !closed) return false;
+        if (filter === "week") {
+          if (new Date(a.applicationDate).getTime() < weekAgo) return false;
+        }
+        if (filter === "stale" && !isStale(a)) return false;
+        if (filter === "followup") {
+          if (!a.followUpDate || a.followUpCompletedAt) return false;
+        }
         if (search) {
           const q = search.toLowerCase();
           const hay = `${a.companyName} ${a.position} ${a.companyLocation}`.toLowerCase();
@@ -132,6 +144,8 @@ export function JtApplicationsPage() {
     return { active, pinned, stale };
   }, [applications]);
 
+  const health = React.useMemo(() => computeHealth(applications), [applications]);
+
   if (!_hasHydrated || isLoading) {
     return <LoadingState />;
   }
@@ -150,6 +164,17 @@ export function JtApplicationsPage() {
       className="sm:!px-8"
     >
       <ListHeader counts={counts} />
+      <PipelineHealth h={health} />
+      <QuickFilters
+        active={filter}
+        onChange={setFilter}
+        counts={{
+          active: counts.active,
+          week: health.weekApplied,
+          stale: counts.stale,
+          followup: health.followUpDue,
+        }}
+      />
       <QuickAddBar />
       <Toolbar
         view={view}
@@ -865,3 +890,231 @@ function NoMatches() {
   );
 }
 
+
+/* ---------- Pipeline health + quick filters ---------- */
+
+type Health = {
+  active: number;
+  weekApplied: number;
+  responseRatePercent: number;
+  bestSource: { name: string; count: number } | null;
+  followUpDue: number;
+};
+
+function computeHealth(apps: JobApplication[]): Health {
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const active = apps.filter(
+    (a) => a.status !== "rejected" && a.status !== "accepted",
+  ).length;
+  const weekApplied = apps.filter(
+    (a) => now - new Date(a.applicationDate).getTime() <= weekMs,
+  ).length;
+
+  // Response = anyone past "applied" / "rejected" (anything beyond the initial state)
+  const responded = apps.filter(
+    (a) => a.status !== "applied" && a.status !== "rejected",
+  ).length;
+  const responseRatePercent =
+    apps.length > 0 ? Math.round((responded / apps.length) * 100) : 0;
+
+  // Best converting source — count "responded" apps per source.
+  const bySource = new Map<string, number>();
+  for (const a of apps) {
+    if (!a.source) continue;
+    if (a.status === "applied" || a.status === "rejected") continue;
+    bySource.set(a.source, (bySource.get(a.source) || 0) + 1);
+  }
+  const best = Array.from(bySource.entries()).sort((a, b) => b[1] - a[1])[0];
+  const bestSource = best ? { name: best[0], count: best[1] } : null;
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const followUpDue = apps.filter((a) => {
+    if (!a.followUpDate || a.followUpCompletedAt) return false;
+    return a.followUpDate <= todayKey;
+  }).length;
+
+  return { active, weekApplied, responseRatePercent, bestSource, followUpDue };
+}
+
+function PipelineHealth({ h }: { h: Health }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        gap: 10,
+        marginBottom: 16,
+      }}
+    >
+      <HealthCell
+        icon={<Briefcase size={13} />}
+        label="Active"
+        value={h.active.toString()}
+      />
+      <HealthCell
+        icon={<CalendarDays size={13} />}
+        label="This week"
+        value={h.weekApplied.toString()}
+      />
+      <HealthCell
+        icon={<TrendingUp size={13} />}
+        label="Response rate"
+        value={`${h.responseRatePercent}%`}
+        accent={h.responseRatePercent >= 20 ? "var(--st-accepted)" : undefined}
+      />
+      {h.followUpDue > 0 ? (
+        <HealthCell
+          icon={<Bell size={13} />}
+          label="Follow-ups due"
+          value={h.followUpDue.toString()}
+          accent="var(--st-rejected)"
+        />
+      ) : h.bestSource ? (
+        <HealthCell
+          icon={<TrendingUp size={13} />}
+          label="Best source"
+          value={h.bestSource.name}
+          subValue={`${h.bestSource.count} responses`}
+        />
+      ) : (
+        <HealthCell
+          icon={<Bell size={13} />}
+          label="Follow-ups due"
+          value="0"
+        />
+      )}
+    </div>
+  );
+}
+
+function HealthCell({
+  icon,
+  label,
+  value,
+  subValue,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subValue?: string;
+  accent?: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "var(--jt-bg-elev)",
+        border: "1px solid var(--jt-border)",
+        borderRadius: "var(--r-md)",
+        padding: "10px 14px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 5,
+          fontSize: 11,
+          fontWeight: 500,
+          color: "var(--jt-text-3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.07em",
+        }}
+      >
+        {icon} {label}
+      </div>
+      <div
+        className="tnum"
+        style={{
+          fontSize: 19,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          color: accent || "var(--jt-text)",
+          lineHeight: 1.15,
+        }}
+      >
+        {value}
+      </div>
+      {subValue && (
+        <div style={{ fontSize: 11, color: "var(--jt-text-3)" }}>{subValue}</div>
+      )}
+    </div>
+  );
+}
+
+function QuickFilters({
+  active,
+  onChange,
+  counts,
+}: {
+  active: Filter;
+  onChange: (f: Filter) => void;
+  counts: { active: number; week: number; stale: number; followup: number };
+}) {
+  const chips: { value: Filter; label: string; count?: number; accent?: string }[] = [
+    { value: "active", label: "Active", count: counts.active },
+    { value: "week", label: "This week", count: counts.week },
+    { value: "stale", label: "Stale", count: counts.stale, accent: "var(--a-700)" },
+    {
+      value: "followup",
+      label: "Follow-up due",
+      count: counts.followup,
+      accent: counts.followup > 0 ? "var(--st-rejected)" : undefined,
+    },
+    { value: "all", label: "All" },
+    { value: "closed", label: "Closed" },
+  ];
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap",
+        marginBottom: 12,
+      }}
+    >
+      {chips.map((c) => {
+        const isActive = active === c.value;
+        return (
+          <button
+            key={c.value}
+            type="button"
+            onClick={() => onChange(c.value)}
+            className="focus-ring"
+            style={{
+              padding: "6px 12px",
+              borderRadius: 999,
+              border: isActive ? "1.5px solid var(--p-500)" : "1.5px solid var(--jt-border)",
+              background: isActive ? "var(--p-50)" : "var(--jt-bg-elev)",
+              color: isActive ? "var(--p-700)" : c.accent || "var(--jt-text-2)",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            {c.label}
+            {typeof c.count === "number" && (
+              <span
+                className="tnum"
+                style={{
+                  fontSize: 11,
+                  color: isActive ? "var(--p-700)" : "var(--jt-text-3)",
+                  fontWeight: 600,
+                }}
+              >
+                {c.count}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

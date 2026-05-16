@@ -695,6 +695,30 @@ function FollowUpCard({ app }: { app: JobApplication }) {
                 ? "Today — time to nudge them."
                 : formatDistanceToNow(followUp, { addSuffix: true })}
           </div>
+          {/* Snooze — bump the existing follow-up forward without leaving the card */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 10,
+              fontSize: 11,
+              color: "var(--jt-text-3)",
+            }}
+          >
+            <span style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>
+              Snooze
+            </span>
+            <QuickButton onClick={() => handleQuick(1)} disabled={busy}>
+              +1d
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(3)} disabled={busy}>
+              +3d
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(7)} disabled={busy}>
+              +1w
+            </QuickButton>
+          </div>
           <div style={{ display: "flex", gap: 6 }}>
             <JtButton
               size="sm"
