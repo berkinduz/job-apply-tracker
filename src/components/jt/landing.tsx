@@ -657,13 +657,12 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
   return (
     <div
       style={{
-        position: "relative",
         background: "var(--jt-bg-elev)",
         border: "1px solid var(--jt-border)",
         borderRadius: "var(--r-xl)",
         overflow: "hidden",
         boxShadow: "var(--sh-md)",
-        aspectRatio: "16 / 9",
+        lineHeight: 0,
       }}
     >
       {media.type === "image" ? (
@@ -671,9 +670,10 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
           key={media.src}
           src={media.src}
           alt={media.alt}
-          fill
+          width={2480}
+          height={1114}
           sizes="(max-width: 1280px) 100vw, 1280px"
-          style={{ objectFit: "cover", objectPosition: "top" }}
+          style={{ width: "100%", height: "auto", display: "block" }}
           priority={tab === "track"}
         />
       ) : (
@@ -685,11 +685,9 @@ function PreviewMedia({ tab }: { tab: "track" | "visual" | "learn" }) {
           loop
           playsInline
           style={{
-            position: "absolute",
-            inset: 0,
             width: "100%",
-            height: "100%",
-            objectFit: "cover",
+            height: "auto",
+            display: "block",
           }}
         />
       )}
@@ -805,22 +803,22 @@ function DeepDive() {
         </div>
         <div
           style={{
-            position: "relative",
             borderRadius: "var(--r-xl)",
             overflow: "hidden",
             border: "1px solid var(--jt-border)",
             boxShadow: "var(--sh-lg)",
-            aspectRatio: "16 / 9",
             background: "var(--jt-bg-elev)",
+            lineHeight: 0,
           }}
         >
           <Image
             key={src}
             src={src}
             alt={t("alt")}
-            fill
+            width={2522}
+            height={1620}
             sizes="(max-width: 1280px) 100vw, 760px"
-            style={{ objectFit: "cover", objectPosition: "top" }}
+            style={{ width: "100%", height: "auto", display: "block" }}
           />
         </div>
       </div>
