@@ -177,7 +177,12 @@ REVOKE INSERT, UPDATE, DELETE ON skill_suggestions FROM anon, authenticated;
 
 Bunlar redesign kapsamı **dışı** ama brief'te room bırakıldı:
 
-1. **URL paste → autofill** (LinkedIn / Indeed scraper). Server-side fetch + parse.
+1. ~~**URL paste → autofill**~~ DONE. `/api/jobs/parse` (auth-gated, SSRF
+   safeguard'lı) cheerio ile schema.org JobPosting JSON-LD okur (Greenhouse,
+   Lever, Workable, Ashby, SmartRecruiters bunu native ship'liyor); LinkedIn
+   için DOM hooks; OpenGraph fallback. Form'un en üstündeki `JobUrlPaste`
+   kartı: link yapıştır + Enter veya Autofill, company/role/location/JD/work
+   type/salary/source otomatik dolar.
 2. **AI job-spec özet** — yapıştırılan JD'yi Anthropic API ile özet (Sonnet 4 ucuz tutar).
 3. **Email forwarding** — `you@inbox.jobtrack.app` adresini kullanıcıya ata; gelen mail'i otomatik application'a dönüştür.
 4. **Browser extension** — LinkedIn job sayfasında "Track in JobTrack" butonu.

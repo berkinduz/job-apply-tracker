@@ -15,6 +15,9 @@ import {
   CalendarIcon,
   Upload,
   FileText,
+  Link as LinkIcon,
+  Sparkles,
+  Check,
 } from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { toast } from "sonner";
@@ -358,6 +361,28 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
           padding: "32px 16px",
         }}
       >
+        {/* Paste link → autofill. Lives above Essentials because pasting before
+            you start typing is the cheapest path to a complete record. */}
+        {!isEditing && (
+          <JobUrlPaste
+            onParsed={(d) => {
+              if (d.companyName) setValue("companyName", d.companyName);
+              if (d.position) setValue("position", d.position);
+              if (d.location) setValue("companyLocation", d.location);
+              if (d.jobPostingContent)
+                setValue("jobPostingContent", d.jobPostingContent);
+              if (d.jobPostingUrl) setValue("jobPostingUrl", d.jobPostingUrl);
+              if (d.source) setValue("source", d.source);
+              if (d.workType) setValue("workType", d.workType);
+              if (d.salaryExpectation) {
+                const parsed = parseSalary(d.salaryExpectation);
+                if (parsed.amount) setSalaryAmount(parsed.amount);
+                setSalaryCurrency(parsed.currency);
+              }
+            }}
+          />
+        )}
+
         {/* Essentials */}
         <FormCard title="Essentials" description="Just enough to get started.">
           <Row>
@@ -819,6 +844,162 @@ export function JtApplicationForm({ application, isEditing }: JtApplicationFormP
 }
 
 /* ---------- subcomponents ---------- */
+
+type ParsedJobData = {
+  companyName?: string;
+  position?: string;
+  location?: string;
+  jobPostingContent?: string;
+  jobPostingUrl: string;
+  source?: string;
+  workType?: "remote" | "hybrid" | "onsite";
+  salaryExpectation?: string;
+  via: string;
+};
+
+function JobUrlPaste({ onParsed }: { onParsed: (data: ParsedJobData) => void }) {
+  const [url, setUrl] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<{
+    companyName?: string;
+    position?: string;
+  } | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const submit = async () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/jobs/parse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: trimmed }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || json.error || "Couldn't read that link.");
+      }
+      const data = json.data as ParsedJobData;
+      onParsed(data);
+      setResult({ companyName: data.companyName, position: data.position });
+      toast.success(
+        data.companyName && data.position
+          ? `Filled ${data.companyName} — ${data.position}`
+          : "Filled what we could find. Tweak as needed.",
+      );
+    } catch (e) {
+      const msg = (e as Error).message;
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        background: "var(--jt-bg-elev)",
+        border: "1px dashed color-mix(in oklab, var(--p-500) 35%, var(--jt-border))",
+        borderRadius: "var(--r-lg)",
+        padding: 18,
+        marginBottom: 16,
+      }}
+    >
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 11,
+          fontWeight: 600,
+          color: "var(--p-700)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          marginBottom: 8,
+        }}
+      >
+        <Sparkles size={12} /> Have a link? We&apos;ll do the rest.
+      </div>
+      <div style={{ display: "flex", gap: 8, flexDirection: "column" }} className="sm:!flex-row">
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "0 12px",
+            background: "var(--jt-bg)",
+            border: "1.5px solid var(--jt-border)",
+            borderRadius: "var(--r-md)",
+            height: 42,
+          }}
+        >
+          <LinkIcon size={14} color="var(--jt-text-3)" />
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (!busy) submit();
+              }
+            }}
+            placeholder="Paste a Greenhouse / Lever / LinkedIn / Workable URL"
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              color: "var(--jt-text)",
+              fontSize: 14,
+              fontFamily: "var(--font-sans)",
+            }}
+          />
+        </div>
+        <JtButton
+          type="button"
+          onClick={submit}
+          disabled={busy || !url.trim()}
+          icon={
+            busy ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Sparkles size={14} />
+            )
+          }
+        >
+          {busy ? "Reading…" : "Autofill"}
+        </JtButton>
+      </div>
+      {result && !busy && (
+        <div
+          style={{
+            marginTop: 10,
+            fontSize: 12,
+            color: "var(--st-accepted)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <Check size={12} />
+          {result.companyName && result.position
+            ? `Prefilled ${result.companyName} — ${result.position}`
+            : "Prefilled what we could find."}
+        </div>
+      )}
+      {error && !busy && (
+        <div style={{ marginTop: 10, fontSize: 12, color: "var(--st-rejected)" }}>
+          {error} — fill the fields manually below.
+        </div>
+      )}
+    </div>
+  );
+}
 
 function FollowUpPicker({
   value,
