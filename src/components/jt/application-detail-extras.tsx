@@ -786,19 +786,31 @@ function FollowUpCard({ app }: { app: JobApplication }) {
           <div style={{ fontSize: 12, color: "var(--jt-text-3)", marginBottom: 12 }}>
             Was due {format(followUp, "MMM d")}
           </div>
-          <JtButton
-            size="sm"
-            variant="secondary"
-            full
-            icon={<Bell size={12} />}
-            onClick={() => setOpen(true)}
-            disabled={busy}
-          >
-            Set another reminder
-          </JtButton>
+          <div style={{ fontSize: 11, color: "var(--jt-text-3)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>
+            Set another
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            <QuickButton onClick={() => handleQuick(3)} disabled={busy}>
+              In 3 days
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(7)} disabled={busy}>
+              In 1 week
+            </QuickButton>
+            <QuickButton onClick={() => handleQuick(14)} disabled={busy}>
+              In 2 weeks
+            </QuickButton>
+          </div>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <span hidden />
+              <JtButton
+                size="sm"
+                variant="secondary"
+                full
+                icon={<CalendarIcon size={12} />}
+                disabled={busy}
+              >
+                Pick a date
+              </JtButton>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
